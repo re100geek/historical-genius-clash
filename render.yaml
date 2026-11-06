@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: historical-genius-clash-online
+    runtime: node
+    region: singapore
+    plan: free
+    buildCommand: npm run check
+    startCommand: npm start
+    healthCheckPath: /health
