@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta name="theme-color" content="#090c16">
-<title>Historical Genius Clash — ONLINE ARENA v10.1.1</title>
+<title>Historical Genius Clash — ONLINE ARENA v10.2</title>
 <style>/* Theme tokens and global page layout */
 :root {
 
@@ -1851,10 +1851,32 @@ body.hgc-high-contrast .hp-track,body.hgc-high-contrast .energy-track{border:2px
 #onlineResult{text-align:center;color:#fff2a1;background:#241b2d;border:1px solid #ff8e8f;padding:16px;margin:10px 0;font:900 22px Impact,sans-serif}
 .online-footer{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:12px 0}
 @media(max-width:600px){.online-config{grid-template-columns:1fr}.online-head h2{font-size:27px}.online-hud{gap:6px}.online-hud-name{display:block;font-size:10px}.online-clock{font-size:24px}.online-controls .key{flex-basis:25%;font-size:10px}}
+
+/* Online arena parity & comfort v10.2 */
+.online-advanced{border:1px solid #45627b;margin-bottom:12px;padding:8px 12px;background:#0d1b2c}
+.online-advanced>summary{cursor:pointer;color:#a5dded;font-size:12px;font-weight:800;padding:4px 0 7px}
+.online-advanced .online-check-actions{margin:8px 0}
+.online-room-actions{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+.online-room-actions .btn{font-size:11px;padding:9px 11px}
+.online-danger{background:linear-gradient(130deg,#723e49,#462631)!important;border:1px solid #ef8292!important;color:#ffe4e7!important}
+.online-status-bar{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin:9px 0 13px;border:1px solid #426274;background:#0b1a29;padding:9px 11px;font-size:11px;color:#a6dfd7}
+.online-status-bar .btn{padding:6px 10px;font-size:10px;margin:0 0 0 3px}
+#onlineConnectionBadge[data-connection="online"]{color:#8ce1b5}
+#onlineConnectionBadge[data-connection="error"]{color:#ffb0af}
+#onlinePing{color:#bad4e9;margin-right:auto;font-family:ui-monospace,monospace}
+.online-guard{height:5px;border:1px solid #56657b;background:#0b1220;margin-top:3px;overflow:hidden}
+.online-guard-fill{height:100%;width:100%;background:linear-gradient(90deg,#6badb8,#abf0c4);transition:width .11s}
+.online-hud-meta{display:block;font-size:10px;line-height:1.8;color:#bcd0e1}
+.online-hud .online-ready-pulse{filter:drop-shadow(0 0 6px #ffcf60);border-color:#ffdf74}
+.online-hud .online-guard-break{background:#f07173}
+.online-match-help{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;font-size:11px;color:#a6c9d6;margin:9px 0}
+.online-match-help span{padding:4px 9px;background:#142b3b;border:1px solid #365a74}
+#onlineReconnect[hidden],#onlineLeaveRoom[hidden]{display:none!important}
+@media(max-width:600px){.online-room{align-items:start}.online-room-actions{width:100%}.online-room-actions .btn{flex:1 1 auto}.online-status-bar{gap:6px}.online-hud-meta{font-size:8px}.online-hud-name{font-size:10px}}
 </style>
 </head>
 <body><main id="app">
-<header><h1>HISTORICAL<br>GENIUS CLASH</h1><div class="subtitle">ONLINE ARENA / V10.1.1 · 13 FIGHTERS / ONLINE 1V1</div><div class="header-rule"></div><button id="profileShortcut" class="gold-shortcut profile-shortcut" type="button" title="프로필과 업적 보기">▣ PROFILE</button><button id="goldShortcut" class="gold-shortcut" type="button" title="상점과 보유 무기 보기"><span aria-hidden="true">◈</span> GOLD <strong id="goldBalance">0</strong></button></header>
+<header><h1>HISTORICAL<br>GENIUS CLASH</h1><div class="subtitle">ONLINE ARENA / V10.2 · 13 FIGHTERS / ONLINE 1V1</div><div class="header-rule"></div><button id="profileShortcut" class="gold-shortcut profile-shortcut" type="button" title="프로필과 업적 보기">▣ PROFILE</button><button id="goldShortcut" class="gold-shortcut" type="button" title="상점과 보유 무기 보기"><span aria-hidden="true">◈</span> GOLD <strong id="goldBalance">0</strong></button></header>
 <section id="select" class="panel">
 <div class="section-kicker">✦ SELECT YOUR HISTORICAL CHAMPION ✦</div>
 <div class="tab-bar" role="tablist" aria-label="게임 메뉴">
@@ -2123,32 +2145,37 @@ body.hgc-high-contrast .hp-track,body.hgc-high-contrast .energy-track{border:2px
 </section>
 
 <section id="onlinePanel" class="panel" hidden aria-label="온라인 1:1 친구 대전">
- <div class="online-head"><div><div class="section-kicker">CONNECT TO THE ARENA</div><h2>ONLINE MATCH · v10.1.1</h2><small>친구와 방 코드를 공유해 실시간 1:1 대전을 시작하세요.</small></div><button id="onlineBack" class="btn alt" type="button">← 메인 메뉴</button></div>
- <div class="online-connection"><label for="onlineServerAddress">온라인 서버 주소 (서버 실행 후 연결)</label><input id="onlineServerAddress" aria-label="온라인 WebSocket 서버 주소" placeholder="ws://localhost:3000/ws" autocomplete="off" spellcheck="false" style="width:100%;margin-top:6px;padding:10px;color:#e8f6ff;background:#0d1928;border:1px solid #617e98">
+ <div class="online-head"><div><div class="section-kicker">CONNECT TO THE ARENA</div><h2>ONLINE MATCH · v10.2</h2><small>친구와 방 코드를 공유해 실시간 1:1 대전을 시작하세요.</small></div><button id="onlineBack" class="btn alt" type="button">← 메인 메뉴</button></div>
+ <details class="online-connection online-advanced" id="onlineAdvanced"><summary>서버 상태·고급 연결 설정</summary><label for="onlineServerAddress">온라인 서버 주소 (서버 실행 후 연결)</label><input id="onlineServerAddress" aria-label="온라인 WebSocket 서버 주소" placeholder="ws://localhost:3000/ws" autocomplete="off" spellcheck="false" style="width:100%;margin-top:6px;padding:10px;color:#e8f6ff;background:#0d1928;border:1px solid #617e98">
  <div class="online-check-actions"><button id="onlineCheckServer" class="btn alt" type="button">서버 연결 확인</button><button id="onlineOpenServer" class="btn alt" type="button">서버 웹페이지 열기</button></div>
  <div id="onlineSetupHint" class="online-setup-hint" role="status">온라인 대전은 실행 중인 Node.js 서버가 필요합니다.</div>
- <details class="online-setup-help" id="onlineHelp"><summary>방이 만들어지지 않을 때 · 서버 실행 방법</summary><div><p><b>PC에서 시작:</b> ZIP 압축 해제 → <code>START_GAME_WINDOWS.bat</code> 실행(Windows), 또는 <code>./start_mac_linux.sh</code> 실행(Mac/Linux). Node.js 20 이상 필요.</p><p><b>이후:</b> 브라우저에서 <code>http://localhost:3000</code>을 열고 온라인 1:1 → 새 방 만들기.</p><p><b>다른 기기:</b> 서버 PC와 같은 Wi-Fi에 연결하고, 서버 PC의 IP 주소로 <code>http://PC_IP:3000</code> 접속. 휴대폰의 localhost는 휴대폰 자신을 가리킵니다.</p><p><b>다른 장소의 친구:</b> 서버를 공개 HTTPS/WSS 호스팅에 배포해야 합니다. ZIP은 배포용 소스이며 이미 공개된 서버를 제공하지는 않습니다.</p></div></details></div>
+ <details class="online-setup-help" id="onlineHelp"><summary>방이 만들어지지 않을 때 · 서버 실행 방법</summary><div><p><b>PC에서 시작:</b> ZIP 압축 해제 → <code>START_GAME_WINDOWS.bat</code> 실행(Windows), 또는 <code>./start_mac_linux.sh</code> 실행(Mac/Linux). Node.js 20 이상 필요.</p><p><b>이후:</b> 브라우저에서 <code>http://localhost:3000</code>을 열고 온라인 1:1 → 새 방 만들기.</p><p><b>다른 기기:</b> 서버 PC와 같은 Wi-Fi에 연결하고, 서버 PC의 IP 주소로 <code>http://PC_IP:3000</code> 접속. 휴대폰의 localhost는 휴대폰 자신을 가리킵니다.</p><p><b>다른 장소의 친구:</b> 서버를 공개 HTTPS/WSS 호스팅에 배포해야 합니다. ZIP은 배포용 소스이며 이미 공개된 서버를 제공하지는 않습니다.</p></div></details></details>
  <div class="online-config">
   <div class="online-block"><strong>방 만들기</strong><label for="onlineCharacter">내 캐릭터</label><select id="onlineCharacter"></select><label for="onlineStage">전장 선택 (방장)</label><select id="onlineStage"></select><button id="onlineCreate" type="button" class="btn">새 방 만들기</button></div>
   <div class="online-block"><strong>친구 방에 참가</strong><label for="onlineRoomCode">6자리 초대 코드</label><input id="onlineRoomCode" maxlength="6" placeholder="예: K7W5XT" autocapitalize="characters" autocomplete="off" spellcheck="false"><p class="online-hint">친구가 보내준 코드를 입력하고 참가하세요. 방 생성자의 게임 서버에 연결됩니다.</p><button id="onlineJoin" type="button" class="btn">초대 코드로 참가</button></div>
  </div>
- <div id="onlineMessage" role="status" aria-live="polite">온라인 서버와 연결한 뒤 방을 만드세요.</div>
+ <div class="online-status-bar"><span id="onlineConnectionBadge" role="status">● 서버 연결 대기</span><span id="onlinePing" aria-live="polite">지연 —</span><button id="onlineReconnect" class="btn alt" hidden type="button">서버 다시 연결</button><button id="onlineSound" class="btn alt" type="button" aria-pressed="false">사운드 끄기</button></div>
+ <div id="onlineMessage" role="status" aria-live="polite">방을 만들거나 초대 코드를 입력하세요.</div>
  <section id="onlineLobby" hidden aria-label="매칭 대기실">
-  <div id="onlineRoomInfo" class="online-room" hidden><span>ROOM CODE <strong id="onlineCode">------</strong></span><button id="onlineCopyCode" class="btn alt" type="button">초대 링크·코드 복사</button></div>
+  <div id="onlineRoomInfo" class="online-room" hidden>
+   <span>ROOM CODE <strong id="onlineCode">------</strong></span>
+   <div class="online-room-actions"><button id="onlineCopyCode" class="btn alt" type="button">초대 링크 복사</button><button id="onlineCopyRoomCode" class="btn alt" type="button">코드 복사</button><button id="onlineLeaveRoom" class="btn online-danger" type="button">방 나가기</button></div>
+  </div>
   <div id="onlineSeats" aria-live="polite">다른 플레이어를 기다리는 중</div>
   <div class="online-footer"><button id="onlineReady" type="button" class="btn" data-ready="0">준비 완료</button><button id="onlineRematch" type="button" class="btn" hidden>재대전 준비</button></div>
  </section>
  <section id="onlineBattle" hidden aria-label="실시간 온라인 전투">
   <div class="match-ribbon" id="onlineMatchLabel">ONLINE MATCH</div>
-  <div class="online-hud"><div><div class="online-hud-name"><span id="onlineP1Name">P1</span><span id="onlineP1LifeText">—</span></div><div class="online-gauge"><div class="online-life" id="onlineP1Life"></div></div><div class="online-power"><div class="online-energy" id="onlineP1Energy"></div></div></div><div class="online-clock" id="onlineTimer">90</div><div><div class="online-hud-name"><span id="onlineP2Name">P2</span><span id="onlineP2LifeText">—</span></div><div class="online-gauge"><div class="online-life" id="onlineP2Life"></div></div><div class="online-power"><div class="online-energy" id="onlineP2Energy"></div></div></div></div>
+  <div class="online-hud"><div><div class="online-hud-name"><span id="onlineP1Name">P1</span><span id="onlineP1LifeText">—</span></div><div class="online-gauge"><div class="online-life" id="onlineP1Life"></div></div><div class="online-power"><div class="online-energy" id="onlineP1Energy"></div></div><div class="online-guard"><div id="onlineP1Guard" class="online-guard-fill"></div></div><small id="onlineP1Status" class="online-hud-meta">GUARD 100 · 필살기 0%</small></div><div class="online-clock" id="onlineTimer">90</div><div><div class="online-hud-name"><span id="onlineP2Name">P2</span><span id="onlineP2LifeText">—</span></div><div class="online-gauge"><div class="online-life" id="onlineP2Life"></div></div><div class="online-power"><div class="online-energy" id="onlineP2Energy"></div></div><div class="online-guard"><div id="onlineP2Guard" class="online-guard-fill"></div></div><small id="onlineP2Status" class="online-hud-meta">GUARD 100 · 필살기 0%</small></div></div>
   <canvas class="online-arena" id="onlineArena" width="960" height="420" aria-label="서버 동기화 온라인 전투 화면"></canvas>
   <div id="onlineResult" hidden role="status" aria-live="polite"></div>
   <div class="online-controls" aria-label="온라인 게임 터치 조작">
    <button class="key" data-online-key="left" type="button">◀ 이동</button><button class="key" data-online-key="right" type="button">이동 ▶</button><button class="key" data-online-key="jump" type="button">점프</button><button class="key guard" data-online-key="guard" type="button">방어</button><button class="key dash" data-online-key="dash" type="button">대시</button><button class="key attack" data-online-key="attack" type="button">약공격</button><button class="key attack" data-online-key="strong" type="button">강공격</button><button class="key special" data-online-key="special" type="button">필살기</button><button class="key dash" data-online-key="dodge" type="button">회피</button>
   </div>
-  <p class="online-hint">키보드: 기존 1P 키 설정 적용 · 전투 판정과 승패는 서버에서 계산합니다. 통신 환경에 따라 입력 지연이 발생할 수 있습니다.</p>
+  <p class="online-hint">PC: A/D 이동 · W 점프 · S 방어 · Shift 대시 · X 약공격 · V 강공격 · C 필살기 · B 회피. 설정에서 변경한 1P 키도 그대로 적용됩니다.</p>
+  <div class="online-match-help"><span>무기·필살기 컷인·피격 효과·BGM·가드 게이지 지원</span><span>온라인 중에는 일시정지 대신 방 나가기를 사용하세요.</span></div>
  </section>
- <div class="online-footer"><button id="onlineFullscreen" type="button" class="btn alt">⛶ 전체화면 전환</button></div>
+ <div class="online-footer"><button id="onlineFullscreen" type="button" class="btn alt">⛶ 전체화면 전환</button><button id="onlineFxToggle" type="button" class="btn alt" aria-pressed="false">연출 간소화</button><button id="onlineLeaveBattle" type="button" class="btn online-danger" hidden>방 나가기</button></div>
 </section>
 </main>
 <script>
@@ -4043,20 +4070,20 @@ body.hgc-high-contrast .hp-track,body.hgc-high-contrast .energy-track{border:2px
   })();
 
   const RenderModule = (() => {
-        function drawWeapon(id){
-     const r=(x,y,w,h,color)=>{ctx.fillStyle=color;ctx.fillRect(x,y,w,h)};
-     const poly=(pts,color,stroke)=>{ctx.beginPath();ctx.moveTo(pts[0][0],pts[0][1]);for(let i=1;i<pts.length;i++)ctx.lineTo(pts[i][0],pts[i][1]);ctx.closePath();ctx.fillStyle=color;ctx.fill();if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=2;ctx.stroke()}};
+        function drawWeapon(id,drawCtx=ctx){
+     const r=(x,y,w,h,color)=>{drawCtx.fillStyle=color;drawCtx.fillRect(x,y,w,h)};
+     const poly=(pts,color,stroke)=>{drawCtx.beginPath();drawCtx.moveTo(pts[0][0],pts[0][1]);for(let i=1;i<pts.length;i++)drawCtx.lineTo(pts[i][0],pts[i][1]);drawCtx.closePath();drawCtx.fillStyle=color;drawCtx.fill();if(stroke){drawCtx.strokeStyle=stroke;drawCtx.lineWidth=2;drawCtx.stroke()}};
      if(id==='newton'){r(-19,-5,31,10,'#6a3b25');r(-23,-7,8,14,'#d9a441');r(6,-16,7,32,'#f4cc55');r(2,-18,15,4,'#ffe58a');r(2,14,15,4,'#ffe58a');poly([[13,-9],[77,-7],[97,0],[77,7],[13,9]],'#e8f7ff','#72c9ed');r(24,-6,45,3,'#fff');['#ff555e','#ffb34c','#f4e957','#6be58a','#69c9ff','#bd8cff'].forEach((c,i)=>r(31+i*8,-3,8,3,c));r(15,-3,8,6,'#8ccfff')}
      else if(id==='leibniz'){r(-18,-5,28,10,'#58213d');r(-16,-3,25,6,'#d95a83');r(5,-13,5,26,'#f0c76a');r(0,-16,12,4,'#f4d78b');r(0,12,12,4,'#f4d78b');poly([[10,-7],[53,-5],[72,0],[53,5],[10,7]],'#d9e2ee','#ff87ad');[22,31,40,49,58].forEach((x,i)=>r(x,i%2?1:-3,4,2,'#f04676'));r(12,-2,5,4,'#fff')}
      else if(id==='handel'){r(-20,-5,32,10,'#54336f');r(-23,-7,8,14,'#f1c86e');r(7,-14,6,28,'#f3cf79');r(3,-16,13,4,'#ffe7a1');r(3,12,13,4,'#ffe7a1');poly([[13,-8],[70,-6],[91,0],[70,6],[13,8]],'#d9c9ff','#9b70d5');[22,31,40,49,58].forEach(x=>r(x,-4,7,3,'#fff'));[27,42,57].forEach(x=>r(x,-7,3,5,'#29213f'));r(75,-2,7,4,'#f8df8b')}
      else if(id==='bach'){r(-18,-4,61,9,'#704c25');r(-15,-2,51,4,'#d8ae58');r(35,-24,15,48,'#08785e');r(49,-30,15,60,'#12a77e');r(64,-20,14,40,'#08785e');r(37,-27,11,4,'#e8d48d');r(51,-33,11,4,'#e8d48d');r(66,-23,10,4,'#e8d48d');r(37,23,11,4,'#e8d48d');r(51,29,11,4,'#e8d48d');r(66,19,10,4,'#e8d48d');r(41,-18,4,36,'#7de0bd');r(55,-22,4,44,'#7de0bd');r(69,-14,4,28,'#7de0bd')}
-     else if(id==='davinci'){r(-19,-5,45,10,'#73502c');r(-17,-3,38,5,'#d7a94e');ctx.strokeStyle='#e6b94d';ctx.lineWidth=9;ctx.beginPath();ctx.moveTo(26,-34);ctx.quadraticCurveTo(91,0,26,34);ctx.stroke();ctx.strokeStyle='#f8e3a0';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(26,-34);ctx.lineTo(26,34);ctx.stroke();r(17,-11,20,22,'#8d6127');r(21,-8,12,16,'#e9bb50');r(24,-5,6,10,'#5b4327');ctx.strokeStyle='#f7d77c';ctx.lineWidth=3;ctx.beginPath();ctx.arc(27,0,10,0,Math.PI*2);ctx.stroke();for(let i=0;i<4;i++)r(38,-24+i*16,7,4,'#fff0b5')}
+     else if(id==='davinci'){r(-19,-5,45,10,'#73502c');r(-17,-3,38,5,'#d7a94e');drawCtx.strokeStyle='#e6b94d';drawCtx.lineWidth=9;drawCtx.beginPath();drawCtx.moveTo(26,-34);drawCtx.quadraticCurveTo(91,0,26,34);drawCtx.stroke();drawCtx.strokeStyle='#f8e3a0';drawCtx.lineWidth=2;drawCtx.beginPath();drawCtx.moveTo(26,-34);drawCtx.lineTo(26,34);drawCtx.stroke();r(17,-11,20,22,'#8d6127');r(21,-8,12,16,'#e9bb50');r(24,-5,6,10,'#5b4327');drawCtx.strokeStyle='#f7d77c';drawCtx.lineWidth=3;drawCtx.beginPath();drawCtx.arc(27,0,10,0,Math.PI*2);drawCtx.stroke();for(let i=0;i<4;i++)r(38,-24+i*16,7,4,'#fff0b5')}
      else if(id==='galileo'){r(-20,-7,24,14,'#694923');r(-16,-5,22,10,'#b17a2e');r(3,-10,58,20,'#b9792e');r(8,-7,48,14,'#e0b45a');r(16,-13,7,26,'#704b25');r(35,-13,7,26,'#704b25');r(55,-15,8,30,'#704b25');r(65,-17,9,34,'#e8c36d');r(73,-13,14,26,'#4b8dbd');r(77,-10,8,20,'#9fe4ff');r(82,-7,4,14,'#e3fbff');r(-20,-9,8,18,'#e0b45a');r(-22,-5,4,10,'#fff0ad')}
-     else if(id==='alexander'){r(-20,-4,84,8,'#7a5528');r(46,-12,36,24,'#caa35b');r(75,-14,8,28,'#fff2bd');r(-22,-8,8,16,'#b17b3d');r(-12,-6,16,12,'#cb4540');ctx.strokeStyle='#f9e3a1';ctx.lineWidth=3;ctx.beginPath();ctx.arc(52,0,16,0,Math.PI*2);ctx.stroke();}
-     else if(id==='socrates'){r(-18,-4,42,8,'#7d633f');r(18,-18,10,36,'#c8b78b');r(28,-8,26,16,'#e7dec4');ctx.strokeStyle='#f2f5d7';ctx.lineWidth=3;ctx.beginPath();ctx.arc(62,0,13,0,Math.PI*2);ctx.stroke();r(55,-4,14,8,'#f4e6a6');}
-     else if(id==='plato'){r(-20,-5,24,10,'#5d6f9e');r(2,-18,8,36,'#d9e0ff');r(10,-9,34,18,'#eff4ff');for(let i=0;i<3;i++){ctx.strokeStyle=['#7da2ef','#a8c4ff','#dce8ff'][i];ctx.lineWidth=2;ctx.beginPath();ctx.arc(58,0,8+i*7,0,Math.PI*2);ctx.stroke();}r(-18,-7,8,14,'#8796bf');}
-     else if(id==='hannibal'){r(-20,-5,32,10,'#6e4426');r(8,-18,8,36,'#ddb06a');poly([[16,-10],[78,0],[16,10]],'#c55f4b','#ffd59c');r(72,-14,20,28,'#7a4730');ctx.strokeStyle='#ffe1b2';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(72,-14);ctx.lineTo(90,14);ctx.stroke();}
-     else {const pal={curie:'#a9f0a8',tesla:'#9fe9ff',ada:'#eea5de'};const col=pal[id]||'#b6deff';r(-20,-5,42,10,'#42546c');r(4,-11,8,22,'#ffdb9c');r(16,-8,50,16,col);r(56,-15,15,30,'#e1eeff');ctx.fillStyle=col;ctx.beginPath();ctx.arc(66,0,20,0,Math.PI*2);ctx.strokeStyle=col;ctx.lineWidth=4;ctx.stroke()}
+     else if(id==='alexander'){r(-20,-4,84,8,'#7a5528');r(46,-12,36,24,'#caa35b');r(75,-14,8,28,'#fff2bd');r(-22,-8,8,16,'#b17b3d');r(-12,-6,16,12,'#cb4540');drawCtx.strokeStyle='#f9e3a1';drawCtx.lineWidth=3;drawCtx.beginPath();drawCtx.arc(52,0,16,0,Math.PI*2);drawCtx.stroke();}
+     else if(id==='socrates'){r(-18,-4,42,8,'#7d633f');r(18,-18,10,36,'#c8b78b');r(28,-8,26,16,'#e7dec4');drawCtx.strokeStyle='#f2f5d7';drawCtx.lineWidth=3;drawCtx.beginPath();drawCtx.arc(62,0,13,0,Math.PI*2);drawCtx.stroke();r(55,-4,14,8,'#f4e6a6');}
+     else if(id==='plato'){r(-20,-5,24,10,'#5d6f9e');r(2,-18,8,36,'#d9e0ff');r(10,-9,34,18,'#eff4ff');for(let i=0;i<3;i++){drawCtx.strokeStyle=['#7da2ef','#a8c4ff','#dce8ff'][i];drawCtx.lineWidth=2;drawCtx.beginPath();drawCtx.arc(58,0,8+i*7,0,Math.PI*2);drawCtx.stroke();}r(-18,-7,8,14,'#8796bf');}
+     else if(id==='hannibal'){r(-20,-5,32,10,'#6e4426');r(8,-18,8,36,'#ddb06a');poly([[16,-10],[78,0],[16,10]],'#c55f4b','#ffd59c');r(72,-14,20,28,'#7a4730');drawCtx.strokeStyle='#ffe1b2';drawCtx.lineWidth=3;drawCtx.beginPath();drawCtx.moveTo(72,-14);drawCtx.lineTo(90,14);drawCtx.stroke();}
+     else {const pal={curie:'#a9f0a8',tesla:'#9fe9ff',ada:'#eea5de'};const col=pal[id]||'#b6deff';r(-20,-5,42,10,'#42546c');r(4,-11,8,22,'#ffdb9c');r(16,-8,50,16,col);r(56,-15,15,30,'#e1eeff');drawCtx.fillStyle=col;drawCtx.beginPath();drawCtx.arc(66,0,20,0,Math.PI*2);drawCtx.strokeStyle=col;drawCtx.lineWidth=4;drawCtx.stroke()}
     }
     function isAuraReady(p){return !!p && p.energy>=100 && p.hp>0 && !p.victory;}
     // Layered, animated flame ribbons instead of the old static yellow character border.
@@ -6747,13 +6774,15 @@ body.hgc-high-contrast .hp-track,body.hgc-high-contrast .energy-track{border:2px
         assert('v9.4.1 필살기 텍스트 레이어 추가',!!$('#specialArtNotice')&&$('#specialArtNotice').hidden);
         assert('v9.4.1 경기별 컷인 사용 기록',typeof SpecialCutinModule.resetMatch==='function'&&typeof SpecialCutinModule.seen==='function'&&!SpecialCutinModule.seen('alexander'));
         assert('v9.4.1 작은 텍스트 알림 스타일',Array.from(document.styleSheets).some(sheet=>{try{return [...sheet.cssRules].some(r=>r.selectorText?.includes('special-art-notice'))}catch{return false}}));
-        assert('v10.1 API 버전 및 라이벌 경로 노출',HistoricalGeniusClash.version==='10.1.1-online-connection-fix'&&typeof HistoricalGeniusClash.routes.route==='function');
+        assert('v10.1 API 버전 및 라이벌 경로 노출',HistoricalGeniusClash.version==='10.2-online-parity'&&typeof HistoricalGeniusClash.routes.route==='function');
         assert('v10.1 온라인 입장·방 코드·준비 UI',!!$('#onlineEnter')&&!!$('#onlineRoomCode')&&!!$('#onlineReady')&&!!$('#onlineBattle'));
         assert('v10.1 온라인 선택 캐릭터 13명',document.querySelectorAll('#onlineCharacter option').length===roster.length);
         assert('v10.1 온라인 전장 10종',document.querySelectorAll('#onlineStage option').length===StageModule.catalog.length);
-        assert('v10.1.1 온라인 서버 검사 및 안내 UI',!!$('#onlineCheckServer')&&!!$('#onlineOpenServer')&&!!$('#onlineSetupHint')&&!!$('#onlineHelp'));
+        assert('v10.2 온라인 서버 검사 및 안내 UI',!!$('#onlineCheckServer')&&!!$('#onlineOpenServer')&&!!$('#onlineSetupHint')&&!!$('#onlineHelp'));
         assert('v10.1.1 실패 메시지에 서버 실행 안내 포함',HistoricalGeniusClash.online.diagnostic('ws://localhost:3000/ws').includes('서버'));
         assert('v10.1 온라인 상태 API',typeof OnlineModule.show==='function'&&OnlineModule.state().active===false);
+        assert('v10.2 온라인 방 나가기·코드 복사·재접속',!!$('#onlineLeaveRoom')&&!!$('#onlineCopyRoomCode')&&!!$('#onlineReconnect'));
+        assert('v10.2 온라인 가드 게이지·사운드·핑',!!$('#onlineP1Guard')&&!!$('#onlineP2Guard')&&!!$('#onlineSound')&&!!$('#onlinePing'));
 
         assert('v9.4.2 중앙 콤보 공지 제거',!CombatModule.resolveAttack.toString().includes('HIT COMBO ·'));
         assert('v9.4.2 중앙 필살기 공지 제거',!CombatModule.resolveAttack.toString().includes('SpecialArtsModule.spec(attacker.f.id).name'));
@@ -6937,8 +6966,33 @@ body.hgc-high-contrast .hp-track,body.hgc-high-contrast .energy-track{border:2px
     let sock=null,room='',slot=null,mode='offline',latest=null,active=false,raf=0,sendTimer=0,stamp=0,drawTick=0;
     let character='newton',lastError='',lastEvents=[],drawPositions=[],gameResult=null;
     let freshPress=Object.create(null),lastSentKeys='';
+    let latency=-1, pingNonce=0, pendingPing=null, pingTimer=0, reconnectRoom='', leaving=false;
+    let impactParticles=[],shakePower=0,flashPower=0,specialCutin=null,savedOnlineVolume=70,onlineReducedFx=false;
+    const seenSpecials=new Set();
     const $id=id=>document.getElementById(id);
     const showMessage=(message,error=false)=>{const box=$id('onlineMessage');box.textContent=message;box.classList.toggle('error',error);lastError=error?message:'';};
+    const setConnectionBadge=(label,status='')=>{const el=$id('onlineConnectionBadge');el.textContent='● '+label;el.dataset.connection=status;};
+    function pingServer(){if(sock?.readyState!==WebSocket.OPEN)return;pendingPing={nonce:++pingNonce,at:performance.now()};send({type:'ping',nonce:pingNonce});}
+    function updateLatency(){const el=$id('onlinePing');el.textContent=latency<0?'지연 확인 중':`지연 ${latency} ms`;el.style.color=latency>=200?'#ffc29d':latency>=100?'#f5e3ab':'#9fe8d1';}
+    function forgetInvite(){if(location.hash.startsWith('#room='))history.replaceState(null,'',location.pathname+location.search);}
+    function localRoomReset(){room='';slot=null;latest=null;mode='offline';gameResult=null;leaving=false;resetInput();seenSpecials.clear();specialCutin=null;impactParticles=[];shakePower=0;flashPower=0;
+      $id('onlineLobby').hidden=true;$id('onlineBattle').hidden=true;$id('onlineRoomInfo').hidden=true;$id('onlineResult').hidden=true;
+      $id('onlineStage').disabled=false;$id('onlineCharacter').disabled=false;$id('onlineReady').hidden=false;$id('onlineRematch').hidden=true;$id('onlineLeaveRoom').hidden=true;$id('onlineLeaveBattle').hidden=true;
+      SpecialCutinModule.clear();AudioModule.setScene('menu');forgetInvite();}
+    function leaveRoom(){
+      if(slot===null||!room){showMessage('현재 참가한 방이 없습니다.');return;}
+      if(leaving)return;
+      if((mode==='running'||mode==='countdown')&&!window.confirm('진행 중인 대전에서 나가면 상대에게 종료 안내가 표시됩니다. 방에서 나가시겠습니까?'))return;
+      leaving=true;resetInput();$id('onlineLeaveRoom').disabled=true;$id('onlineLeaveBattle').disabled=true;
+      showMessage('방에서 나가는 중…');
+      if(!send({type:'leave'})){localRoomReset();showMessage('방에서 나왔습니다. 새 방을 만들거나 참가하세요.');}
+    }
+    function tryReconnect(){const previous=room||reconnectRoom;const character=$id('onlineCharacter').value;reconnectRoom=previous;
+      if(sock){try{sock.close();}catch{}sock=null;}
+      setConnectionBadge('재접속 중');$id('onlineReconnect').hidden=true;
+      if(previous&&previous.length===6){localRoomReset();$id('onlineRoomCode').value=previous;connect({type:'join',room:previous,character});}
+      else connect();}
+
     const send=(data)=>{if(sock?.readyState===WebSocket.OPEN){sock.send(JSON.stringify(data));return true;}return false;};
     const serverAddress=()=>{
       let entered=$id('onlineServerAddress').value.trim();
@@ -6980,20 +7034,30 @@ body.hgc-high-contrast .hp-track,body.hgc-high-contrast .energy-track{border:2px
       if(!raf)raf=requestAnimationFrame(drawLoop);
       if(!sendTimer)sendTimer=setInterval(transmitInput,33);
       if(location.hash.match(/^#room=([A-Z0-9]{6})$/i))$id('onlineRoomCode').value=location.hash.slice(6).toUpperCase();
-      updateConnectionHint();
-      showMessage(location.protocol==='file:'?offlineNote():'온라인 서버 연결을 확인한 뒤 방을 만들거나 초대 코드를 입력하세요.',location.protocol==='file:');
+      updateConnectionHint();updateSoundButton();
+      $id('onlineAdvanced').open=location.protocol==='file:';
+      $id('onlineReconnect').hidden=true;
+      AudioModule.setScene('menu');
+      showMessage(location.protocol==='file:'?offlineNote():'방을 만들거나 초대 코드를 입력하세요.',location.protocol==='file:');
+      if(!pingTimer)pingTimer=setInterval(pingServer,4000);
+      const invited=location.hash.match(/^#room=([A-Z0-9]{6})$/i);
+      if(invited && slot===null && !sock){$id('onlineRoomCode').value=invited[1].toUpperCase();joinRoom();}
+
     }
     function hide(){
       if(sock){try{send({type:'leave'});}catch{}const s=sock;sock=null;s.close();}
       clearConnectTimer();active=false;resetInput();clearInterval(sendTimer);sendTimer=0;
+      clearInterval(pingTimer);pingTimer=0;reconnectRoom='';latency=-1;pendingPing=null;
       cancelAnimationFrame(raf);raf=0;
       panel.hidden=true;$('#select').style.display='block';
-      room='';slot=null;latest=null;mode='offline';gameResult=null;
+      localRoomReset();
+      $id('onlineLeaveRoom').disabled=false;
       $id('onlineStage').disabled=false;$id('onlineCharacter').disabled=false;
       $id('onlineBattle').hidden=true;$id('onlineLobby').hidden=true;
       $id('onlineRoomInfo').hidden=true;
       $id('onlineReady').hidden=false;$id('onlineRematch').hidden=true;
-      if(location.hash.startsWith('#room='))history.replaceState(null,'',location.pathname+location.search);
+      forgetInvite();
+      setConnectionBadge('서버 연결 대기');
       SettingsModule.showTab('selection');
     }
     async function connect(action){
@@ -7013,21 +7077,22 @@ body.hgc-high-contrast .hp-track,body.hgc-high-contrast .energy-track{border:2px
         connectTimer=setTimeout(()=>{
           if(sock!==current||current.readyState===WebSocket.OPEN)return;
           failed=true;showMessage(connectionFailure(url,'연결 시간 초과'),true);try{current.close();}catch{}clearConnectTimer();
-        },6000);
+        },isLocalAddress(url)?8000:45000);
         current.addEventListener('open',()=>{
           if(sock!==current)return;
-          hadOpened=true;clearConnectTimer();showMessage('서버에 연결됐습니다. 방을 준비하고 있습니다.');
+          hadOpened=true;clearConnectTimer();setConnectionBadge('서버 연결됨','online');$id('onlineReconnect').hidden=true;pingServer();showMessage('서버에 연결됐습니다. 방을 준비하고 있습니다.');
           if(action)send(action);
         });
         current.addEventListener('message',event=>{if(sock!==current)return;try{handle(JSON.parse(event.data));}catch(error){console.warn('온라인 응답 오류',error);}});
         current.addEventListener('close',event=>{
           if(sock!==current)return;
-          sock=null;clearConnectTimer();
+          sock=null;clearConnectTimer();setConnectionBadge('연결 끊김','error');$id('onlineReconnect').hidden=!active;
+          reconnectRoom=room;
           const interrupted=mode==='running'||mode==='countdown';mode='offline';resetInput();
           if(interrupted){gameResult='서버와 연결이 끊겼습니다.';showResult();}
           if(!failed)showMessage(hadOpened?`서버 연결이 종료됐습니다. 서버가 켜져 있는지 확인하세요. (${event.code||'연결 종료'})`:connectionFailure(url),true);
         });
-        current.addEventListener('error',()=>{if(sock===current){failed=true;showMessage(connectionFailure(url),true);}});
+        current.addEventListener('error',()=>{if(sock===current){failed=true;setConnectionBadge('연결 오류','error');$id('onlineReconnect').hidden=!active;showMessage(connectionFailure(url),true);}});
       }catch(error){clearConnectTimer();showMessage(error.message,true);}
     }
     function openServerPage(){
@@ -7052,7 +7117,7 @@ body.hgc-high-contrast .hp-track,body.hgc-high-contrast .energy-track{border:2px
           showMessage(message,!ok);
           try{testSocket.close();}catch{}
         };
-        timeout=setTimeout(()=>finish(false,connectionFailure(url,'응답 시간 초과')),6000);
+        timeout=setTimeout(()=>finish(false,connectionFailure(url,'응답 시간 초과')),isLocalAddress(url)?8000:45000);
         testSocket.addEventListener('message',event=>{
           try{const data=JSON.parse(event.data);if(data.type==='hello')finish(true,'서버 연결 성공 · 온라인 방을 만들 수 있습니다.');}catch{}
         });
@@ -7060,11 +7125,11 @@ body.hgc-high-contrast .hp-track,body.hgc-high-contrast .energy-track{border:2px
         testSocket.addEventListener('close',()=>{if(!done)finish(false,connectionFailure(url));});
       }catch(error){clearTimeout(timeout);setBusy(false);showMessage(error.message,true);}
     }
-    const createRoom=()=>connect({type:'create',character:$id('onlineCharacter').value,stage:$id('onlineStage').value});
+    const createRoom=()=>connect({type:'create',character:$id('onlineCharacter').value,stage:$id('onlineStage').value,skin:EconomyModule.equippedFor($id('onlineCharacter').value)});
     const joinRoom=()=>{
       const code=$id('onlineRoomCode').value.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,6);
       if(code.length!==6){showMessage('6자리 방 코드를 입력하세요.',true);return;}
-      connect({type:'join',room:code,character:$id('onlineCharacter').value});
+      connect({type:'join',room:code,character:$id('onlineCharacter').value,skin:EconomyModule.equippedFor($id('onlineCharacter').value)});
     };
     function renderLobby(data){
       mode=data.status;
@@ -7081,10 +7146,13 @@ body.hgc-high-contrast .hp-track,body.hgc-high-contrast .energy-track{border:2px
       $id('onlineReady').hidden=data.status!=='lobby';
       $id('onlineRematch').hidden=data.status!=='finished';
       $id('onlineCharacter').disabled=data.status!=='lobby'||!!mine.ready;
-      $id('onlineStage').disabled=true;
+      $id('onlineStage').disabled=data.status!=='lobby'||slot!==0||!!mine.ready;
+      if(data.stage)$id('onlineStage').value=data.stage;
+      $id('onlineLeaveRoom').disabled=false;$id('onlineLeaveBattle').disabled=false;
       if(data.status==='lobby'){
         $id('onlineBattle').hidden=true;
-        showMessage(people[1]?'상대와 준비 버튼을 누르면 3초 후 시작합니다.':'초대 코드 또는 링크를 친구에게 공유하세요.');
+        if(people[1])showMessage('상대와 함께 준비 완료를 누르면 3초 뒤 시작합니다.');
+        else showMessage('초대 링크를 친구에게 공유하세요. 방을 나가도 다른 방에 다시 참가할 수 있습니다.');
       }
     }
     function handle(data){
@@ -7092,30 +7160,36 @@ body.hgc-high-contrast .hp-track,body.hgc-high-contrast .energy-track{border:2px
       switch(data.type){
         case 'hello': if(data.version!=='10.1')showMessage('서버 버전이 다릅니다. v10.1 서버를 사용하세요.',true);break;
         case 'joined':
-          room=data.room;slot=data.slot;mode='lobby';gameResult=null;latest=null;lastEvents=[];
+          room=data.room;slot=data.slot;mode='lobby';leaving=false;reconnectRoom='';gameResult=null;latest=null;impactParticles=[];lastEvents=[];seenSpecials.clear();
+          $id('onlineLeaveRoom').hidden=false;$id('onlineLeaveRoom').disabled=false;$id('onlineLeaveBattle').hidden=false;$id('onlineReconnect').hidden=true;
+          if(location.hash!=='#room='+room)history.replaceState(null,'',location.pathname+location.search+'#room='+room);
           $id('onlineRoomCode').value=room;$id('onlineRoomInfo').hidden=false;
           $id('onlineCode').textContent=room;$id('onlineLobby').hidden=false;
           break;
         case 'lobby': if(data.room===room)renderLobby(data);break;
         case 'countdown':
-          mode='countdown';latest=null;gameResult=null;drawPositions=[];lastEvents=[];
+          mode='countdown';latest=null;gameResult=null;drawPositions=[];lastEvents=[];impactParticles=[];specialCutin=null;seenSpecials.clear();shakePower=0;flashPower=0;
+          AudioModule.setStage(data.stage||'library');AudioModule.setScene('battle');AudioModule.sfx('choice');
           $id('onlineBattle').hidden=false;$id('onlineResult').hidden=true;
           $id('onlineReady').hidden=true;
           showMessage('매치 시작 준비 중…');
           $id('onlineMatchLabel').textContent=`ONLINE · ${data.room} · 3초 후 시작`;
           break;
-        case 'start':mode='running';$id('onlineMatchLabel').textContent=`ONLINE · ${room} · FIGHT!`;showMessage('대전 진행 중 · 공격과 방어 판정은 서버에서 처리합니다.');break;
+        case 'start':mode='running';AudioModule.sfx('attack');$id('onlineMatchLabel').textContent=`ONLINE · ${room} · FIGHT!`;showMessage('대전 진행 중 · 공격과 방어 판정은 서버에서 처리합니다.');break;
         case 'state':
           if(data.room!==room)return;
           latest=data;
           if(data.status==='running'||data.status==='finished')mode=data.status;
-          for(const evt of data.events||[]){lastEvents.push({...evt,ttl:22});if(lastEvents.length>12)lastEvents.shift();}
+          for(const evt of data.events||[]){lastEvents.push({...evt,ttl:22});if(lastEvents.length>12)lastEvents.shift();emitOnlineEvent(evt);}
           if(data.status==='finished' && gameResult===null){gameResult=winLabel(data.winner);showResult();}
           updateHud();break;
         case 'result':
-          mode='finished';gameResult=data.reason==='disconnect'?'상대의 연결이 종료됐습니다.':winLabel(data.winner);showResult();break;
+          mode='finished';gameResult=data.reason==='disconnect'?'상대가 방을 나갔습니다.':' '+winLabel(data.winner);showResult();
+          AudioModule.sfx(data.winner===slot?'victory':'ko');break;
+        case 'pong':if(pendingPing&&data.nonce===pendingPing.nonce){latency=Math.round(performance.now()-pendingPing.at);pendingPing=null;updateLatency();}break;
         case 'error':showMessage(data.message||'온라인 서버 오류',true);break;
-        case 'left':mode='offline';room='';slot=null;$id('onlineLobby').hidden=true;$id('onlineBattle').hidden=true;break;
+        case 'left':localRoomReset();showMessage('방에서 나왔습니다. 새 방 만들기 또는 코드로 참가할 수 있습니다.');break;
+        case 'opponent_left':showMessage('상대 플레이어가 방을 나갔습니다. 다른 친구를 초대하거나 방을 나가세요.');break;
       }
     }
     function winLabel(winner){return winner===null?'무승부 · 시간 종료':winner===slot?'승리!':'패배 · 재도전하세요';}
@@ -7132,6 +7206,11 @@ body.hgc-high-contrast .hp-track,body.hgc-high-contrast .energy-track{border:2px
         $id(id+'Life').style.width=Math.max(0,f.hp/f.maxHp*100)+'%';
         $id(id+'LifeText').textContent=`${f.hp} / ${f.maxHp}`;
         $id(id+'Energy').style.width=f.energy+'%';
+        $id(id+'Energy').parentElement.classList.toggle('online-ready-pulse',f.energy>=100);
+        $id(id+'Guard').style.width=Math.max(0,f.guardMeter||0)+'%';
+        $id(id+'Guard').classList.toggle('online-guard-break',f.guardMeter<=0);
+        const name=TalentModule.info(f.id).name;
+        $id(id+'Status').textContent=(f.guard?'방어 · ':'')+(f.stun>0?'피격 · ':'')+`GUARD ${f.guardMeter} · 필살기 ${f.energy}%`+(f.energy>=100?' · 준비':'')+` · ${name}`;
       }
       $id('onlineTimer').textContent=String(latest.seconds||0).padStart(2,'0');
     }
@@ -7153,35 +7232,192 @@ body.hgc-high-contrast .hp-track,body.hgc-high-contrast .energy-track{border:2px
       if(mapped?.player===1){event.preventDefault();if(!event.repeat)press(mapped.action,true);}
     }
     function keyUp(event){if(!onlineActive())return;const mapped=SettingsModule.actionForCode(event.code);if(mapped?.player===1){event.preventDefault();press(mapped.action,false);}}
+    // ONLINE VISUALS V10.2 — share the offline combat sprites, weapons, specials and sounds.
+    function emitOnlineEvent(event){
+      if(!event||!latest?.fighters)return;
+      if(event.type==='attack'){
+        const actor=latest.fighters[event.slot];
+        if(event.kind==='special'){
+          AudioModule.sfx('special',actor?.id);
+          if(actor && !onlineReducedFx && !VisualSettingsModule.lowFX() && VisualSettingsModule.cutinMode()!=='text' && !seenSpecials.has(actor.id)){
+            seenSpecials.add(actor.id);specialCutin={id:actor.id,start:drawTick};
+          }
+        }else AudioModule.sfx('attack',event.kind);
+      }
+      if(event.type==='hit'){
+        const victim=latest.fighters[event.to],source=latest.fighters[event.from];
+        AudioModule.sfx(event.guard?'block':'hit',event.kind);
+        shakePower=Math.max(shakePower,event.guard?3:event.kind==='special'?14:event.kind==='heavy'?10:6);
+        flashPower=VisualSettingsModule.flashes()?Math.max(flashPower,event.kind==='special'?8:4):0;
+        const v=victim||source;
+        if(v)impactParticles.push({x:v.x,y:v.y-70,age:0,kind:event.kind,guard:event.guard,damage:event.damage,combo:event.combo,dir:source?.dir||1,guardBreak:!!event.guard&&victim?.guardMeter<=0});
+        if(impactParticles.length>18)impactParticles.shift();
+      }
+      if(event.type==='talent'){
+        const source=latest.fighters[event.slot];
+        if(source){impactParticles.push({x:source.x,y:source.y-125,age:0,kind:'talent',guard:false,damage:0,combo:0,dir:source.dir,label:String(event.label||'SKILL').slice(0,28)});
+          if(impactParticles.length>20)impactParticles.shift();}
+      }
+      if(event.type==='ko'||event.type==='timeout')AudioModule.sfx('ko');
+    }
+    function onlineSoundToggle(){
+      const settings=AudioModule.getSettings();
+      if(settings.master>0){savedOnlineVolume=settings.master;AudioModule.setVolume('master',0);}
+      else {AudioModule.unlock();AudioModule.setVolume('master',savedOnlineVolume||70);}
+      updateSoundButton();
+    }
+    function updateSoundButton(){
+      const muted=AudioModule.getSettings().master<=0;
+      $id('onlineSound').textContent=muted?'음소거 해제':'사운드 끄기';
+      $id('onlineSound').setAttribute('aria-pressed',muted?'true':'false');
+    }
+    function auraOnline(f,x,y,t){
+      if(f.energy<100||f.hp<=0)return;
+      g.save();g.translate(x,y);g.globalCompositeOperation='screen';
+      const glow=g.createRadialGradient(0,-64,3,0,-62,93);
+      glow.addColorStop(0,'rgba(255,216,75,.24)');glow.addColorStop(.7,'rgba(252,185,37,.12)');glow.addColorStop(1,'rgba(255,170,0,0)');
+      g.fillStyle=glow;g.fillRect(-110,-160,220,178);
+      if(!VisualSettingsModule.lowFX()){
+        for(let i=0;i<11;i++){
+          const side=i%2?-1:1,base=side*(20+(i%5)*9),wave=Math.sin(t*.08+i*2.4)*10;
+          const h=45+(i*23)%67+Math.sin(t*.12+i)*9;
+          const grad=g.createLinearGradient(base,-3,base,-h);
+          grad.addColorStop(0,'rgba(255,176,23,.06)');grad.addColorStop(.4,'rgba(255,213,63,.27)');grad.addColorStop(1,'rgba(255,234,147,0)');
+          g.beginPath();g.moveTo(base-7,-8);g.bezierCurveTo(base+wave-20,-h*.48,base+wave+19,-h*.7,base+wave,-h);g.bezierCurveTo(base-wave*.3+9,-h*.5,base+8,-14,base+7,-8);g.closePath();g.fillStyle=grad;g.fill();
+        }
+      }
+      g.restore();
+    }
+    function drawOnlineFighter(f,other){
+      const def=roster.find(x=>x.id===f.id);if(!def)return;
+      const at=drawPositions[f.slot]||(drawPositions[f.slot]={x:f.x,y:f.y});
+      const delta=Math.abs(f.x-at.x);
+      if(delta>175){at.x=f.x;at.y=f.y;}else{at.x+=(f.x-at.x)*.39;at.y+=(f.y-at.y)*.42;}
+      const duration=f.attackMax||(f.attack==='special'?38:f.attack==='heavy'?22:16);
+      const adapted={f:def,x:at.x,y:at.y,vx:f.vx,dir:f.dir,ground:f.ground,flash:f.flash,attack:f.attackTime,attackMax:f.attack?duration:0,
+        attackType:f.attack==='heavy'?'heavy':f.attack==='special'?'special':'normal',hitStun:f.stun,guarding:f.guard,dashFrames:f.dash||0,dodgeFrames:f.invuln||0,
+        animTime:drawTick,landFrames:0,victory:mode==='finished'&&latest?.winner===f.slot};
+      const motion=AnimationModule.pose(adapted,drawTick);
+      const state=motion.state;
+      auraOnline(f,at.x,at.y,drawTick);
+      if(!VisualSettingsModule.lowFX()&&motion.trailIntensity>0){
+        g.save();g.imageSmoothingEnabled=false;
+        for(let i=2;i>=1;i--){g.globalAlpha=state==='dash'?.18:.11;
+          g.save();g.translate(at.x-f.dir*(14+i*11),at.y+motion.bobOffset);if(f.dir<0)g.scale(-1,1);
+          g.drawImage(CharacterModule.battleFrame(def,motion,drawTick-i*3),-48,-130,96,132);g.restore();}
+        g.restore();
+      }
+      g.save();g.translate(at.x,at.y);if(f.dir<0)g.scale(-1,1);
+      g.fillStyle='#08101baa';g.beginPath();g.ellipse(0,6,38,8,0,0,Math.PI*2);g.fill();
+      if((state==='move'||state==='dash')&&!VisualSettingsModule.lowFX()){
+        for(let i=0;i<(state==='dash'?5:3);i++){g.globalAlpha=.25+(i%3)*.08;g.fillStyle=def.color;g.fillRect(-28-i*12,-5-(i%2)*4,8,3);}g.globalAlpha=1;
+      }
+      const bob=motion.bobOffset+(state==='move'?Math.abs(Math.sin(drawTick*.20))*3:state==='idle'?Math.sin(drawTick*.065)*1.6:0);
+      const lean=motion.leanOffset+(state==='move'?.07:state==='hit'?-.15:state==='dash'?.2:0);
+      g.save();g.translate(0,bob);g.rotate(lean);g.scale(1+motion.squashX,1+motion.squashY);
+      g.imageSmoothingEnabled=false;g.shadowColor=def.color;g.shadowBlur=state==='attack'?11:4;
+      if(state==='hit'&&drawTick%3===0)g.globalAlpha=.55;
+      g.drawImage(CharacterModule.battleFrame(def,motion,drawTick),-48,-130,96,132);g.restore();
+      const phase=duration?Math.min(1,f.attackAge/duration):0;
+      const armY=state==='victory'?-82:state==='hit'?-58:state==='attack'?-68:state==='guard'?-52:-66;
+      g.fillStyle=def.robe;g.fillRect(15,armY+bob+motion.armOffset,21,12);g.fillStyle=def.skin;g.fillRect(35,armY+2+bob+motion.armOffset,8,8);
+      let rotation=-.12;
+      if(state==='attack'){rotation=def.style==='smash'?-2.1+phase*3.2:def.style==='thrust'?-.1+phase*.35:-1.5+phase*2.7;
+        if(f.attack==='special')rotation+=Math.sin(phase*Math.PI)*.35;
+      }else if(state==='guard')rotation=-1.05;else if(state==='dash')rotation=.55;else if(state==='hit')rotation=-.55;
+      else if(state==='victory')rotation=-1.15;
+      rotation+=motion.weaponOffset;
+      g.save();g.translate(34,armY+4+bob+motion.armOffset);g.rotate(rotation);
+      // Equipped local weapon skins are visual-only. The server retains all combat authority.
+      const skin=typeof f.skin==='string'&&WeaponSkinModule.byId.get(f.skin)?.character===f.id?f.skin:null;
+      if(!(skin&&WeaponSkinModule.draw(g,skin)))RenderModule.drawWeapon(f.id,g);
+      g.restore();
+      if(state==='guard'){
+        g.save();g.strokeStyle='#b6ecff';g.globalAlpha=.25+.09*Math.sin(drawTick*.2);g.lineWidth=4;g.beginPath();g.ellipse(24,-66,38,67,-.1,0,Math.PI*2);g.stroke();g.restore();
+      }
+      if(state==='attack'&&!VisualSettingsModule.lowFX()){
+        g.save();g.globalAlpha=.45;g.strokeStyle=def.color;g.shadowColor=def.color;g.shadowBlur=15;g.lineWidth=f.attack==='heavy'?11:6;
+        g.beginPath();g.arc(38,-52,f.attack==='special'?70:57,-1.25+phase*1.25,.10+phase*1.25);g.stroke();g.restore();
+      }
+      g.restore();
+      if(f.attack==='special'&&!VisualSettingsModule.lowFX()){
+        const focus=other?other.x:at.x+f.dir*150;
+        SpecialArtsModule.draw(g,{f:def,currentAttack:{type:'special',artKey:f.id,elapsed:f.attackAge,activeStart:15,duration:38,
+          originDir:f.dir,originX:at.x,originY:at.y,focusX:focus}});
+      }
+    }
+    function drawOnlineTalents(f){
+      if(onlineReducedFx||VisualSettingsModule.lowFX())return;
+      const zones=[['wellFrames','wellX',200,'#9be8ff','GRAVITY'],['gadgetFrames','gadgetX',128,'#ffe0a5','MACHINE'],
+        ['fieldFrames','fieldX',112,'#c0ffad','RADIANCE'],['ideaFrames','ideaX',118,'#c9ddff','IDEA']];
+      for(const [timer,coord,radius,color,label] of zones){
+        if(!(f[timer]>0))continue;
+        const progress=Math.min(1,f[timer]/130);g.save();g.globalAlpha=.2+Math.sin(drawTick*.08)*.08;
+        g.strokeStyle=color;g.fillStyle=color;g.shadowColor=color;g.shadowBlur=18;g.lineWidth=3;
+        g.beginPath();g.ellipse(f[coord],300,radius,25,0,0,Math.PI*2);g.stroke();
+        g.globalAlpha=.11*progress;g.beginPath();g.ellipse(f[coord],300,radius,25,0,0,Math.PI*2);g.fill();
+        g.font='bold 11px monospace';g.globalAlpha=.75;g.textAlign='center';g.fillText(label,f[coord],282);g.restore();
+      }
+    }
+    function drawOnlineImpacts(){
+      for(const e of impactParticles){
+        const t=e.age++,life=22,fade=Math.max(0,1-t/life),r=12+t*3.5;
+        if(t>=life)continue;
+        g.save();g.globalAlpha=fade;g.lineWidth=e.guard?4:6;g.strokeStyle=e.guard?'#b2ecfa':e.kind==='special'?'#ffe891':'#ffbb87';
+        g.shadowColor=g.strokeStyle;g.shadowBlur=18;
+        g.beginPath();g.arc(e.x,e.y,r,0,Math.PI*2);g.stroke();
+        for(let i=0;i<(e.guard?8:14);i++){const a=i*Math.PI*2/(e.guard?8:14)+(e.age*.05),rr=r+18+(i%3)*7;
+          g.fillStyle=i%2?'#fff4c7':g.strokeStyle;g.fillRect(e.x+Math.cos(a)*rr,e.y+Math.sin(a)*rr,4+(i%3)*2,4);}
+        g.textAlign='center';g.font='bold 19px ui-monospace,monospace';g.fillStyle=e.guard?'#a7f2ff':'#fff9dc';g.strokeStyle='#091121';g.lineWidth=4;
+        const txt=e.label|| (e.guardBreak?'GUARD BREAK':e.guard?'GUARD':String(e.damage||''));
+        g.strokeText(txt,e.x,e.y-38-t*1.35);g.fillText(txt,e.x,e.y-38-t*1.35);
+        if(e.combo>=2&&!e.guard){g.fillStyle='#ffe0a0';g.font='bold 15px Impact,sans-serif';g.fillText(e.combo+' HIT COMBO',e.x,e.y-76-t*.7);}
+        g.restore();
+      }
+      impactParticles=impactParticles.filter(e=>e.age<22);
+    }
+    function drawOnlineResult(){
+      if(mode!=='finished'||!latest?.fighters)return;
+      const win=latest.winner;
+      const victor=win===null?null:latest.fighters[win];
+      g.save();g.fillStyle='#070e20b8';g.fillRect(0,0,960,420);
+      if(victor){const f=roster.find(v=>v.id===victor.id);
+        if(f){g.save();g.globalAlpha=.85;g.drawImage(f.portrait,56,18,312,366);g.restore();}
+        g.fillStyle='#ffe6a1';g.font='900 68px Impact,sans-serif';g.textAlign='left';g.fillText('VICTORY',400,188);
+        g.font='bold 28px sans-serif';g.fillText(f?.name||'승자',404,237);
+        g.font='bold 18px sans-serif';g.fillStyle='#d7edff';g.fillText(f?.ult||'결투 승리',404,271);
+      }else{g.font='900 70px Impact,sans-serif';g.fillStyle='#fff3cc';g.textAlign='center';g.fillText('DRAW',480,212);}
+      g.fillStyle='#bdd2dc';g.font='bold 16px sans-serif';g.textAlign='center';g.fillText('재대전 준비 또는 방 나가기를 선택하세요',480,393);
+      g.restore();
+    }
     function drawLoop(){
       if(!onlineActive()){raf=0;return;}
       drawTick++;
       if(!$id('onlineBattle').hidden){
+        const low=VisualSettingsModule.lowFX()||onlineReducedFx;
         g.save();
+        const displacement=VisualSettingsModule.shakeScale()*shakePower;
+        if(displacement>0){g.translate(Math.sin(drawTick*2.9)*displacement,Math.cos(drawTick*2.15)*displacement*.65);shakePower=Math.max(0,shakePower-.65);}
         StageModule.draw(g,latest?.stage||$id('onlineStage').value,drawTick,VisualSettingsModule.stageMotion());
         if(latest?.fighters?.length===2){
-          const sorted=[...latest.fighters].sort((a,b)=>a.slot-b.slot);
-          for(const f of sorted){
-            const def=roster.find(x=>x.id===f.id);if(!def)continue;
-            const xEntry=drawPositions[f.slot]||(drawPositions[f.slot]={x:f.x,y:f.y});
-            xEntry.x+=(f.x-xEntry.x)*.35;xEntry.y+=(f.y-xEntry.y)*.4;
-            const anim=f.attack?{state:'attack',anticipation:f.attackAge<6?.9:0,strike:f.attackAge>=6&&f.attackAge<15?1:0,recover:f.attackAge>=15?1:0}:
-                      f.flash?{state:'hit'}:f.guard?{state:'guard'}:!f.ground?{state:'jump'}:Math.abs(f.vx)>1?{state:'move'}:{state:'idle'};
-            g.save();g.translate(xEntry.x,xEntry.y);if(f.dir<0)g.scale(-1,1);
-            g.fillStyle='#090f1a';g.beginPath();g.ellipse(0,6,40,7,0,0,Math.PI*2);g.fill();
-            if(f.energy>=100){g.strokeStyle='#ffcf62';g.lineWidth=3;g.globalAlpha=.45+.18*Math.sin(drawTick*.2);g.beginPath();g.ellipse(0,-64,42,82,0,0,Math.PI*2);g.stroke();g.globalAlpha=1;}
-            g.imageSmoothingEnabled=false;
-            g.drawImage(CharacterModule.battleFrame(def,anim,drawTick),-48,-132,96,132);
-            g.restore();
+          const ordered=[...latest.fighters].sort((a,b)=>a.slot-b.slot);
+          for(const f of ordered)drawOnlineTalents(f);
+          for(const f of ordered)drawOnlineFighter(f,ordered[1-f.slot]);
+          if(!low)drawOnlineImpacts();else impactParticles=[];
+          if(flashPower>0&&VisualSettingsModule.flashes()){
+            g.fillStyle='rgba(255,246,222,'+(flashPower*.024)+')';g.fillRect(0,0,960,420);flashPower=Math.max(0,flashPower-1.5);
           }
-          const cap=lastEvents.filter(e=>e.ttl>0 && e.type==='hit').slice(-3);
-          for(const event of cap){const victim=drawPositions[event.to];if(!victim)continue;g.save();g.globalAlpha=Math.min(1,event.ttl/11);g.strokeStyle=event.guard?'#9beeff':'#ffd2a0';g.lineWidth=5;g.beginPath();g.arc(victim.x,victim.y-68,(23-event.ttl)*3+13,0,Math.PI*2);g.stroke();g.restore();}
-          for(const event of lastEvents)event.ttl--;
-          while(lastEvents.length&&lastEvents[0].ttl<=0)lastEvents.shift();
-          const last=lastEvents.filter(e=>e.ttl>0&&e.type==='attack'&&e.kind==='special').at(-1);
-          if(last){const attacker=latest.fighters[last.slot];const def=roster.find(f=>f.id===attacker?.id);if(def){g.save();g.globalAlpha=Math.min(1,last.ttl/8);g.fillStyle='#0c1526dd';g.fillRect(600,15,346,40);g.font='bold 16px sans-serif';g.textAlign='right';g.fillStyle='#fff2c5';g.fillText(`${def.name} · ${def.ult}`,930,42);g.restore();}}
         }
-        if(mode==='countdown'){g.fillStyle='#09131ccc';g.fillRect(0,0,960,420);g.font='bold 45px Impact,sans-serif';g.textAlign='center';g.fillStyle='#ffe4ab';g.fillText('READY?',480,218);}
+        if(mode==='countdown'){
+          g.fillStyle='#0c1526b9';g.fillRect(0,0,960,420);g.font='900 52px Impact,sans-serif';g.textAlign='center';g.fillStyle='#ffe8ac';g.fillText('READY?  3 · 2 · 1',480,214);
+        }
+        if(mode==='finished')drawOnlineResult();
+        if(specialCutin){
+          const elapsed=drawTick-specialCutin.start,duration=56;
+          if(elapsed<duration){
+            if(SpecialCutinModule.preview(specialCutin.id,elapsed/duration))g.drawImage($('#specialCutinCanvas'),0,0,960,420);
+          }else{specialCutin=null;SpecialCutinModule.clear();}
+        }
         g.restore();
       }
       raf=requestAnimationFrame(drawLoop);
@@ -7193,6 +7429,9 @@ body.hgc-high-contrast .hp-track,body.hgc-high-contrast .energy-track{border:2px
       try{await navigator.clipboard.writeText(value);showMessage('초대 '+(url.protocol==='file:'?'코드':'링크')+'를 복사했습니다.');}
       catch{showMessage('초대 코드: '+room+' · 복사 후 친구에게 전달하세요.');}
     }
+    async function copyRoomCode(){if(!room)return;
+      try{await navigator.clipboard.writeText(room);showMessage('방 코드 '+room+'를 복사했습니다.');}
+      catch{showMessage('초대 코드: '+room+' · 친구에게 전달하세요.');}}
     function mount(){
       const names=$id('onlineCharacter');for(const fighter of roster){const option=document.createElement('option');option.value=fighter.id;option.textContent=fighter.name;names.append(option);}
       for(const stage of StageModule.catalog){const option=document.createElement('option');option.value=stage.id;option.textContent=stage.name;$id('onlineStage').append(option);}
@@ -7205,6 +7444,17 @@ body.hgc-high-contrast .hp-track,body.hgc-high-contrast .energy-track{border:2px
       updateConnectionHint();
       if(location.hash.match(/^#room=([A-Z0-9]{6})$/i))$id('onlineRoomCode').value=location.hash.slice(6).toUpperCase();
       $id('onlineEnter').addEventListener('click',show);
+      $id('onlineLeaveRoom').addEventListener('click',leaveRoom);$id('onlineLeaveBattle').addEventListener('click',leaveRoom);
+      $id('onlineCopyRoomCode').addEventListener('click',copyRoomCode);
+      $id('onlineReconnect').addEventListener('click',tryReconnect);
+      $id('onlineSound').addEventListener('click',onlineSoundToggle);
+      $id('onlineFxToggle').addEventListener('click',()=>{
+        onlineReducedFx=!onlineReducedFx;
+        $id('onlineFxToggle').textContent=onlineReducedFx?'전체 연출 켜기':'연출 간소화';
+        $id('onlineFxToggle').setAttribute('aria-pressed',onlineReducedFx?'true':'false');
+        if(onlineReducedFx){specialCutin=null;SpecialCutinModule.clear();}
+      });
+      updateSoundButton();
       $id('onlineBack').addEventListener('click',hide);
       $id('onlineCreate').addEventListener('click',createRoom);
       $id('onlineCheckServer').addEventListener('click',testConnection);
@@ -7214,7 +7464,8 @@ body.hgc-high-contrast .hp-track,body.hgc-high-contrast .energy-track{border:2px
       $id('onlineReady').addEventListener('click',()=>send({type:'ready',ready:$id('onlineReady').dataset.ready!=='1'}));
       $id('onlineRematch').addEventListener('click',()=>{send({type:'rematch'});$id('onlineBattle').hidden=true;$id('onlineResult').hidden=true;showMessage('재대전 준비 화면으로 돌아갑니다.');});
       $id('onlineFullscreen').addEventListener('click',()=>FullscreenModule.toggle());
-      $id('onlineCharacter').addEventListener('change',()=>{character=names.value;if(slot!==null)send({type:'character',character});});
+      $id('onlineCharacter').addEventListener('change',()=>{character=names.value;if(slot!==null)send({type:'character',character,skin:EconomyModule.equippedFor(character)});});
+      $id('onlineStage').addEventListener('change',()=>{if(slot===0&&mode==='lobby')send({type:'stage',stage:$id('onlineStage').value});});
       window.addEventListener('keydown',keyDown);window.addEventListener('keyup',keyUp);
       window.addEventListener('blur',resetInput);document.addEventListener('visibilitychange',()=>{if(document.hidden)resetInput();});
       panel.querySelectorAll('[data-online-key]').forEach(button=>{
@@ -7247,9 +7498,10 @@ body.hgc-high-contrast .hp-track,body.hgc-high-contrast .energy-track{border:2px
   TestModule.mount();
   BackupModule.mount();
   OnlineModule.mount();
+  if(/^#room=[A-Z0-9]{6}$/i.test(location.hash))OnlineModule.show();
   if(new URLSearchParams(location.search).has('test')) setTimeout(()=>TestModule.run(),10);
   window.HistoricalGeniusClash = Object.freeze({
-    version: '10.1.1-online-connection-fix',
+    version: '10.2-online-parity',
     characters: roster.map(({ id, name }) => ({ id, name })),
     start: GameModule.start,
     returnToSelection: GameModule.backToSelection,
