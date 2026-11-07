@@ -357,7 +357,7 @@ function handle(ws,data){
  }
 }
 /* HGC_ACCOUNT_API_START */
-const hgcAccountApi = require('./auth/account-api').createAuthApi();
+const hgcAccountApi = require('./account-api').createAuthApi();
 const server=http.createServer((req,res)=>{
  const requestPath=new URL(req.url,'http://localhost').pathname;
  if(requestPath.startsWith('/api/auth/')){void hgcAccountApi.handle(req,res);return;}
