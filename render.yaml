@@ -4,6 +4,6 @@ services:
     runtime: node
     region: singapore
     plan: free
-    buildCommand: npm run check
+    buildCommand: npm install --omit=dev && npm run check
     startCommand: npm start
     healthCheckPath: /health

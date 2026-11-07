@@ -1,5 +1,5 @@
 'use strict';
-/* Historical Genius Clash v10.1 — dependency-free HTTP + WebSocket arena server.
+/* Historical Genius Clash v10.3 — dependency-free HTTP + WebSocket arena server.
  * This is a starter server for casual friend matches, not a production anti-cheat service.
  * Server exclusively authorizes movement, attacks, damage, energy, timers and victory.
  */
@@ -83,9 +83,9 @@ function roomStatus(room){
 function emitLobby(room){tell(room,roomStatus(room));}
 function freshFighter(player,index){
  const s=STATS.get(player.character),x=index?710:250;
- return {id:s.id,skin:player.skin||null,slot:index,x,y:316,vx:0,vy:0,dir:index?-1:1,hp:s.hp,maxHp:s.hp,energy:0,guardMeter:100,guard:false,ground:true,
+ return {id:s.id,skin:player.skin||null,slot:index,x,y:316,vx:0,vy:0,dir:index?-1:1,hp:s.hp,maxHp:s.hp,energy:0,guardMeter:100,guard:false,guardFrames:0,ground:true,
   cooldown:0,stun:0,invuln:0,dodgeCd:0,dashCd:0,dash:0,attack:'',attackTime:0,attackAge:0,hitDone:false,flash:0,
-  combo:0,comboTimer:0,specialsUsed:0,prev:emptyInput(),attackMax:0,
+  combo:0,comboTimer:0,specialsUsed:0,damageDealt:0,hits:0,bestCombo:0,prev:emptyInput(),attackMax:0,specialStrike:0,specialStartX:0,specialStartDir:1,specialFocusX:0,
   slowFrames:0,counterFrames:0,arcMark:0,arcOwner:-1,rhythmFrames:0,rhythmStacks:0,algorithmStep:0,
   wellFrames:0,wellX:0,gadgetFrames:0,gadgetTick:0,gadgetX:0,fieldFrames:0,fieldTick:0,fieldX:0,
   phalanxFrames:0,dialogueFrames:0,ideaFrames:0,ideaTick:0,ideaX:0,rushFrames:0};
@@ -99,7 +99,7 @@ function leaveRoom(p){
  const slot=room.players.indexOf(p);if(slot>=0)room.players[slot]=null;
  if(room.status==='running'||room.status==='countdown'){
    room.status='finished';room.winner=slot===0?1:0;
-   tell(room,{type:'result',winner:room.winner,reason:'disconnect'});
+   tell(room,{type:'result',winner:room.winner,matchNumber:room.matchNumber,reason:'disconnect'});
  }
  if(room.players.every(x=>!x)){rooms.delete(room.code);}else{
    tell(room,{type:'opponent_left',room:room.code});
@@ -109,14 +109,14 @@ function leaveRoom(p){
 }
 function startMatch(room){
  if(room.players.length!==2||!room.players.every(p=>p&&p.ready))return;
- room.status='countdown';room.countdown=90;room.ticks=0;room.fighters=room.players.map(freshFighter);room.winner=null;
+ room.status='countdown';room.countdown=90;room.ticks=0;room.matchNumber=(room.matchNumber||0)+1;room.fighters=room.players.map(freshFighter);room.winner=null;
  room.players.forEach(p=>{p.input=emptyInput();p.lastInputAt=now();});
- tell(room,{type:'countdown',seconds:3,room:room.code,stage:room.stage,characters:room.fighters.map(f=>f.id)});
+ tell(room,{type:'countdown',seconds:3,room:room.code,stage:room.stage,matchNumber:room.matchNumber,characters:room.fighters.map(f=>f.id)});
  emitLobby(room);
 }
 function sendState(room,events=[]){
- const data={type:'state',room:room.code,status:room.status,stage:room.stage,frame:room.ticks,seconds:Math.max(0,Math.ceil((2700-room.ticks)/30)),winner:room.winner,events,
-  fighters:room.fighters.map(f=>({id:f.id,slot:f.slot,x:Math.round(f.x*10)/10,y:Math.round(f.y*10)/10,vx:Math.round(f.vx*10)/10,vy:Math.round(f.vy*10)/10,dir:f.dir,hp:f.hp,maxHp:f.maxHp,energy:Math.round(f.energy),guardMeter:Math.round(f.guardMeter),guard:f.guard,ground:f.ground,attack:f.attack,attackAge:f.attackAge,attackTime:f.attackTime,flash:f.flash,stun:f.stun,combo:f.combo,dash:f.dash,invuln:f.invuln,skin:f.skin||null,attackMax:f.attackMax,slowFrames:f.slowFrames,arcMark:f.arcMark,
+ const data={type:'state',room:room.code,status:room.status,stage:room.stage,frame:room.ticks,matchNumber:room.matchNumber,seconds:Math.max(0,Math.ceil((2970-room.ticks)/30)),winner:room.winner,events,
+  fighters:room.fighters.map(f=>({id:f.id,slot:f.slot,x:Math.round(f.x*10)/10,y:Math.round(f.y*10)/10,vx:Math.round(f.vx*10)/10,vy:Math.round(f.vy*10)/10,dir:f.dir,hp:f.hp,maxHp:f.maxHp,energy:Math.round(f.energy),guardMeter:Math.round(f.guardMeter),guard:f.guard,ground:f.ground,attack:f.attack,attackAge:f.attackAge,attackTime:f.attackTime,flash:f.flash,stun:f.stun,combo:f.combo,dash:f.dash,invuln:f.invuln,skin:f.skin||null,attackMax:f.attackMax,specialStrike:f.specialStrike,specialStartX:f.specialStartX,specialStartDir:f.specialStartDir,specialFocusX:f.specialFocusX,damageDealt:f.damageDealt,bestCombo:f.bestCombo,hits:f.hits,specialsUsed:f.specialsUsed,slowFrames:f.slowFrames,arcMark:f.arcMark,
     wellFrames:f.wellFrames,wellX:f.wellX,gadgetFrames:f.gadgetFrames,gadgetX:f.gadgetX,fieldFrames:f.fieldFrames,fieldX:f.fieldX,
     ideaFrames:f.ideaFrames,ideaX:f.ideaX,phalanxFrames:f.phalanxFrames,rushFrames:f.rushFrames,dialogueFrames:f.dialogueFrames,
     rhythmStacks:f.rhythmStacks,algorithmStep:f.algorithmStep,counterFrames:f.counterFrames}))};
@@ -124,6 +124,7 @@ function sendState(room,events=[]){
 }
 // Online talent parity: authoritative implementations of the 13 character identities.
 const CHARACTER_TEMPO={newton:[23,31],leibniz:[15,19],handel:[21,25],bach:[29,36],davinci:[20,25],galileo:[17,23],curie:[21,26],tesla:[18,24],ada:[17,22],alexander:[20,27],socrates:[18,24],plato:[20,27],hannibal:[24,32]};
+const SPECIAL_STRIKES={newton:30,leibniz:15,handel:15,bach:19,davinci:13,galileo:17,curie:25,tesla:14,ada:21,alexander:16,socrates:21,plato:23,hannibal:18};
 const SPECIAL_RANGES={newton:280,leibniz:280,handel:290,bach:300,davinci:330,galileo:370,curie:340,tesla:400,ada:320,alexander:320,socrates:275,plato:325,hannibal:320};
 function talentEvent(events,f,label){events.push({type:'talent',slot:f.slot,label});}
 function auxiliaryHit(owner,target,amount,label,room,events){
@@ -205,9 +206,9 @@ function talentTick(f,target,room,events){
 
 function resolveHit(attacker,target,room,events){
  const t=attacker.attack;const s=STATS.get(attacker.id);
- const range=t==='special'?SPECIAL_RANGES[attacker.id]:s.reach+(t==='heavy'?(attacker.id==='bach'?120:46):20);
+ const range=t==='special'?SPECIAL_RANGES[attacker.id]:s.reach+(t==='heavy'?(attacker.id==='bach'?120:46):t==='air'?55:20);
  const forward=(target.x-attacker.x)*attacker.dir;
- if(forward < -28 || Math.abs(target.x-attacker.x)>range || Math.abs(target.y-attacker.y)>105)return;
+ if(forward < -28 || Math.abs(target.x-attacker.x)>range || Math.abs(target.y-attacker.y)>123)return;
  if(target.id==='leibniz'&&target.counterFrames>0){
    target.counterFrames=0;target.energy=Math.min(100,target.energy+20);attacker.stun=Math.max(attacker.stun,16);
    attacker.vx=target.dir*6;auxiliaryHit(target,attacker,24,'COUNTER',room,events);return;
@@ -218,34 +219,47 @@ function resolveHit(attacker,target,room,events){
  if(attacker.id==='ada'&&((t==='heavy'&&attacker.algorithmStep===1)||(t==='special'&&attacker.algorithmStep===2)))power*=t==='heavy'?1.24:1.36;
  if(attacker.id==='alexander'&&attacker.phalanxFrames>0&&t!=='special')power*=1.1;
  const guard=target.guard&&target.guardMeter>0&&target.ground;
- const damage=Math.max(1,Math.round(power*(guard?.28:1)));
- target.hp=Math.max(0,target.hp-damage);target.flash=8;target.stun=guard?3:t==='special'?16:t==='heavy'?12:7;
+ const perfect=guard&&target.guardFrames>0&&target.guardFrames<=7;
+ const comboScale=Math.max(.55,1-Math.max(0,attacker.combo)*.11);
+ const scaledPower=power*comboScale;
+ let damage=Math.max(1,Math.round(scaledPower*(guard?(perfect?.10:t==='heavy'?.41:.26):1)));
+ target.hp=Math.max(0,target.hp-damage);target.flash=guard?5:12;target.stun=guard?4:t==='special'?17:t==='heavy'?15:9;
  target.vx=attacker.dir*(guard?2:t==='special'?9:6);
  if(!guard)target.vy=t==='special'?-4:-2;
- if(guard){target.guardMeter=Math.max(0,target.guardMeter-(t==='heavy'?33:t==='special'?38:18)-(attacker.id==='bach'&&t!=='normal'?16:0));if(target.guardMeter===0){target.stun=26;target.guard=false;}}
+ let guardBreak=false;
+ if(guard){
+   target.guardMeter=Math.max(0,target.guardMeter-(t==='heavy'?42:t==='special'?37:19)-(attacker.id==='bach'&&t!=='normal'?16:0));
+   if(target.guardMeter===0){guardBreak=true;target.stun=35;target.guard=false;}
+   else if(perfect){attacker.stun=Math.max(attacker.stun,8);target.energy=Math.min(100,target.energy+12);}
+ }
  if(t!=='special')attacker.energy=Math.min(100,attacker.energy+s.energyGain*(t==='heavy'?1.4:1));
  target.energy=Math.min(100,target.energy+(guard?4:8));
- attacker.combo=attacker.comboTimer>0?attacker.combo+1:1;attacker.comboTimer=65;
- events.push({type:'hit',from:attacker.slot,to:target.slot,damage,guard,kind:t,combo:attacker.combo});
+ attacker.combo=attacker.comboTimer>0?attacker.combo+1:1;attacker.comboTimer=65;attacker.bestCombo=Math.max(attacker.bestCombo,attacker.combo);attacker.damageDealt+=damage;attacker.hits++;
+ events.push({type:'hit',from:attacker.slot,to:target.slot,damage,guard,perfect,guardBreak,kind:t,combo:attacker.combo});
  talentOnHit(attacker,target,t,guard,room,events);
  if(target.hp===0){room.winner=attacker.slot;room.status='finished';events.push({type:'ko',winner:attacker.slot});}
 }
 function startAttack(f,kind,events,target){
- if(f.cooldown>0||f.stun>0||f.attackTime>0||!f.ground||f.dash>0||f.guard)return;
+ if(f.cooldown>0||f.stun>0||f.attackTime>0||f.dash>0||f.guard)return;
+ if(kind==='special'&&!f.ground)return;
  if(kind==='special'){if(f.energy<100)return;f.energy=0;f.specialsUsed++;}
  const tempo=CHARACTER_TEMPO[f.id]||[20,25];
- f.attack=kind;f.attackTime=kind==='special'?38:kind==='heavy'?tempo[0]+8:tempo[0];
+ const actualKind=!f.ground&&kind!=='special'?'air':kind;
+ f.attack=actualKind;f.attackTime=kind==='special'?38:kind==='heavy'?tempo[0]+8:tempo[0];
  f.attackMax=f.attackTime;f.attackAge=0;f.hitDone=false;
+ if(kind==='special'){f.specialStrike=SPECIAL_STRIKES[f.id]||15;f.specialStartX=f.x;f.specialStartDir=f.dir;f.specialFocusX=target?.x??(f.x+f.dir*180);}
  f.cooldown=kind==='special'?48:kind==='heavy'?tempo[1]+8:tempo[1];
  talentAttackStart(f,target,kind,events);
- events.push({type:'attack',slot:f.slot,kind});
+ events.push({type:'attack',slot:f.slot,kind:actualKind});
 }
 function stepFighter(f,input,events,target){
  const s=STATS.get(f.id),edge=(k)=>input[k]&&!f.prev[k];
  if(f.cooldown>0)f.cooldown--;if(f.stun>0)f.stun--;if(f.flash>0)f.flash--;if(f.dashCd>0)f.dashCd--;
  if(f.dodgeCd>0)f.dodgeCd--;if(f.invuln>0)f.invuln--;if(f.comboTimer>0)f.comboTimer--;else f.combo=0;
  const horizontal=(input.left?-1:0)+(input.right?1:0);
+ const wasGuard=f.guard;
  f.guard=!!(input.guard&&f.stun===0&&f.ground&&f.attackTime===0&&f.guardMeter>0&&f.dash===0);
+ f.guardFrames=f.guard?(wasGuard?Math.min(999,f.guardFrames+1):1):0;
  if(!f.guard)f.guardMeter=clamp(f.guardMeter+.21,0,100);
  if(f.stun===0){
    if(!f.guard&&horizontal&&f.dash===0)f.vx=clamp(f.vx+horizontal*s.speed*1.25*(f.slowFrames>0?.62:1),-7,7);
@@ -278,7 +292,7 @@ function stepMatch(room){
  for(let i=0;i<2;i++){
   const f=all[i],target=all[1-i];f.dir=target.x>=f.x?1:-1;
   if(f.attack&&!f.hitDone){
-    const threshold=f.attack==='special'?15:f.attack==='heavy'?9:5;
+    const threshold=f.attack==='special'?(f.specialStrike||15):f.attack==='heavy'?9:5;
     if(f.attackAge>=threshold){f.hitDone=true;resolveHit(f,target,room,events);}
   }
  }
@@ -286,17 +300,17 @@ function stepMatch(room){
    for(let i=0;i<2;i++)talentTick(all[i],all[1-i],room,events);
  }
  if(all[0].x>all[1].x&&all[0].x-all[1].x<30){all[0].x-=15;all[1].x+=15;}
- if(room.ticks>=2700&&room.status==='running'){
+ if(room.ticks>=2970&&room.status==='running'){
   const a=all[0].hp/all[0].maxHp,b=all[1].hp/all[1].maxHp;
   room.winner=a===b?null:(a>b?0:1);room.status='finished';events.push({type:'timeout',winner:room.winner});
  }
  if(room.ticks%2===0||events.length)sendState(room,events);
- if(room.status==='finished')tell(room,{type:'result',winner:room.winner,reason:events.some(e=>e.type==='timeout')?'timeout':'ko'});
+ if(room.status==='finished')tell(room,{type:'result',winner:room.winner,matchNumber:room.matchNumber,reason:events.some(e=>e.type==='timeout')?'timeout':'ko'});
 }
 function createRoom(ws,character,stage,skin){
  if(rooms.size>=MAX_ROOMS){send(ws,{type:'error',message:'현재 방이 가득 찼습니다.'});return;}
  const code=roomCode();const player={ws,room:null,slot:0,character:STATS.has(character)?character:'newton',skin:validCosmetic(skin),ready:false,input:emptyInput(),lastInputAt:now(),lastMessageAt:0};
- const room={code,players:[player,null],status:'lobby',stage:VALID_STAGES.includes(stage)?stage:'library',fighters:[],ticks:0};
+ const room={code,players:[player,null],status:'lobby',stage:VALID_STAGES.includes(stage)?stage:'library',fighters:[],ticks:0,matchNumber:0};
  player.room=room;rooms.set(code,room);ws.player=player;
  send(ws,{type:'joined',room:code,slot:0});emitLobby(room);
 }
@@ -342,12 +356,15 @@ function handle(ws,data){
   p.room.status='lobby';p.room.players.forEach(q=>{if(q){q.ready=false;q.input=emptyInput();}});emitLobby(p.room);
  }
 }
+/* HGC_ACCOUNT_API_START */
+const hgcAccountApi = require('./auth/account-api').createAuthApi();
 const server=http.createServer((req,res)=>{
  const requestPath=new URL(req.url,'http://localhost').pathname;
+ if(requestPath.startsWith('/api/auth/')){void hgcAccountApi.handle(req,res);return;}
  if(req.method!=='GET'){res.writeHead(405);res.end();return;}
  if(requestPath==='/health'){
   res.writeHead(200,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});
-  res.end(JSON.stringify({ok:true,version:'10.2',rooms:rooms.size,players:clients.size}));return;
+  res.end(JSON.stringify({ok:true,version:'10.3',rooms:rooms.size,players:clients.size}));return;
  }
  if(requestPath!=='/'&&requestPath!=='/index.html'){res.writeHead(404);res.end('Not found');return;}
  const file=path.join(__dirname,'index.html');
@@ -374,14 +391,14 @@ server.on('upgrade',(req,socket,head)=>{
   if(clients.size>=160){socket.destroy();return;}
   const ws=new MiniWS(socket);clients.add(ws);
   ws.onmessage=d=>handle(ws,d);ws.onclose=()=>{if(ws.player)leaveRoom(ws.player);};
-  ws.send({type:'hello',version:'10.1',features:['stage','leave','ping','cosmetics'],characters:[...STATS.keys()]});
+  ws.send({type:'hello',version:'10.3',features:['stage','leave','ping','cosmetics'],characters:[...STATS.keys()]});
   if(head?.length)ws.receive(head);
  }catch{socket.destroy();}
 });
 const tick=setInterval(()=>{for(const room of rooms.values())stepMatch(room);},TICK_MS);
 const pulse=setInterval(()=>{for(const ws of [...clients]){if(now()-ws.pongAt>40000)ws.close();else ws.writeFrame(9,Buffer.from('hgc'));}},15000);
 server.listen(PORT,HOST,()=>{
- console.log(`Historical Genius Clash v10.2 server started: http://localhost:${PORT}`);
+ console.log(`Historical Genius Clash v10.3 server started: http://localhost:${PORT}`);
  console.log('Server stays online while this terminal is open.');
  for(const iface of Object.values(os.networkInterfaces())){
   for(const addr of iface||[]){if(addr.family==='IPv4'&&!addr.internal){console.log(`Same Wi-Fi devices: http://${addr.address}:${PORT}`);}}

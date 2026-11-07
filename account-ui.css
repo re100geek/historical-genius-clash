@@ -1,0 +1,152 @@
+/* Scoped game account modal, uses original HGC dark HUD palette. */
+.hgc-account-launch {
+  position: fixed;
+  z-index: 990;
+  top: max(12px, env(safe-area-inset-top));
+  right: 12px;
+  padding: 9px 15px;
+  border: 1px solid #6babc9;
+  background: #0b172cde;
+  color: #ebf4ff;
+  border-radius: 7px;
+  font: 700 12px/1.5 system-ui, sans-serif;
+  cursor: pointer;
+}
+.hgc-account-overlay[hidden],
+.hgc-account-auth[hidden],
+.hgc-account-member[hidden],
+.hgc-register-info[hidden] {display: none !important;}
+body.hgc-account-modal-open {overflow: hidden;}
+.hgc-account-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  background: #050a17e8;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  overflow: auto;
+  font-family: system-ui, sans-serif;
+  color: #f1f5ff;
+}
+.hgc-account-dialog {
+  width: min(440px, 100%);
+  max-height: calc(100dvh - 32px);
+  overflow: auto;
+  border: 1px solid #729ac3;
+  border-radius: 14px;
+  background: linear-gradient(150deg, #1c2d4d, #0e172a 75%);
+  box-shadow: 0 24px 85px #000a;
+  padding: 22px;
+}
+.hgc-account-head {display: flex; justify-content: space-between; align-items: center; color: #a2bdd8; font: 700 11px monospace; letter-spacing: 2px;}
+.hgc-account-head button {border: 0; background: #253653; color: #fff; padding: 8px 12px; border-radius: 5px; cursor: pointer;}
+.hgc-account-emblem {
+  display: grid;
+  place-items: center;
+  width: 66px;
+  height: 66px;
+  border: 2px solid #d5b56c;
+  border-radius: 50%;
+  margin: 15px auto 8px;
+  background: radial-gradient(#52668e, #17233c);
+  color: #ffe4a4;
+  box-shadow: 0 0 28px #e5c26344;
+  font: 900 21px Georgia, serif;
+}
+.hgc-account-dialog h2 {font-size: 25px; margin: 8px 0; text-align: center; color: #fff2d6;}
+.hgc-account-subtitle {text-align: center; color: #a9bdd4; font-size: 12px; margin: 0 0 16px;}
+.hgc-account-status {min-height: 20px; margin: 6px 0 12px; font-size: 12px; color: #90e2c6; text-align: center;}
+.hgc-account-status.is-error {color: #ffadb0;}
+.hgc-account-tabs {display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid #516a89; margin: 0 0 18px;}
+.hgc-account-tabs button {background: none; border: 0; color: #a9c5db; padding: 12px; cursor: pointer; font-weight: 750;}
+.hgc-account-tabs button[aria-pressed="true"] {color: #ffe2a1; border-bottom: 3px solid #ffe2a1;}
+.hgc-account-form {display: flex; flex-direction: column; gap: 9px;}
+.hgc-account-form label {font-size: 12px; font-weight: 700; color: #dae7f6;}
+.hgc-account-form input {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 46px;
+  border: 1px solid #61829c;
+  border-radius: 6px;
+  padding: 10px 12px;
+  background: #0a1426;
+  color: #f6fbff;
+  font-size: 14px;
+}
+.hgc-password-row {display: flex; gap: 7px;}
+.hgc-password-row input {min-width: 0; flex: 1;}
+.hgc-show-password {border: 1px solid #577998; border-radius: 5px; background: #243953; color: #dce9f6; padding: 0 12px; cursor: pointer;}
+.hgc-register-info {font-size: 11px; color: #b0cbd8; margin: 2px 0 0; line-height: 1.6;}
+.hgc-account-primary {border: 0; border-radius: 6px; background: linear-gradient(90deg, #e1bd79, #ffdda1); color: #151c30; font-size: 14px; font-weight: 900; min-height: 45px; cursor: pointer; margin-top: 10px;}
+.hgc-account-welcome, .hgc-welcome {color: #ffe5b4; margin: 10px 0; font-size: 15px;}
+.hgc-account-member > p {font-size: 12px; color: #b8cde0; line-height: 1.6;}
+.hgc-account-sync {display: grid; gap: 9px; margin: 16px 0;}
+.hgc-account-sync button {padding: 13px; border: 1px solid #6d9abe; background: #18324e; color: #ecf9ff; border-radius: 6px; font-weight: 750; cursor: pointer;}
+.hgc-account-logout {width: 100%; border: 1px solid #987889; padding: 11px; border-radius: 6px; background: #39232e; color: #ffe2ea; cursor: pointer;}
+.hgc-account-foot {color: #91afc4; text-align: center; font-size: 11px; margin: 20px 0 0; line-height: 1.6;}
+.hgc-account-dialog button:focus-visible, .hgc-account-launch:focus-visible, .hgc-account-dialog input:focus-visible {outline: 2px solid #95e7ff; outline-offset: 3px;}
+@media (max-width: 520px) { .hgc-account-launch {top: auto; bottom: calc(12px + env(safe-area-inset-bottom)); right: 10px;} .hgc-account-dialog {padding: 16px;} }
+@media (prefers-reduced-motion: reduce) { .hgc-account-dialog *, .hgc-account-launch {transition: none !important; animation: none !important;} }
+
+/* v13.2: self-contained account tab, not a floating modal. */
+#accountPanel[hidden] { display: none !important; }
+.hgc-account-page {
+  min-height: 500px;
+  padding: 20px clamp(10px, 3vw, 32px) 30px;
+  border: 1px solid #5a708e;
+  border-radius: 12px;
+  background: radial-gradient(ellipse at 55% 0, #243b5d, #0d172c 69%);
+}
+.hgc-account-page-heading {
+  max-width: 960px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  margin: 8px auto 24px;
+}
+.hgc-account-page-heading h2 { margin: 8px 0; color: #fff0c5; font-size: clamp(23px, 4vw, 34px); }
+.hgc-account-page-heading p { margin: 0; color: #b5cce1; line-height: 1.65; font-size: 13px; }
+.hgc-account-page-eyebrow { color: #f2d38e; letter-spacing: .15em; font: 800 11px ui-monospace, monospace; }
+.hgc-account-identity {
+  max-width: 200px;
+  padding: 10px 15px;
+  flex-shrink: 0;
+  border: 1px solid #baa06c;
+  background: #152946;
+  color: #ffe2ac;
+  border-radius: 8px;
+  font: 800 12px ui-monospace, monospace;
+  overflow-wrap: anywhere;
+}
+.hgc-account-inline {
+  position: static;
+  display: block;
+  inset: auto;
+  z-index: auto;
+  padding: 0;
+  overflow: visible;
+  background: transparent;
+  isolation: auto;
+}
+.hgc-account-inline .hgc-account-dialog {
+  margin: auto;
+  width: min(540px, 100%);
+  max-height: none;
+  overflow: visible;
+  border-color: #8b9cb8;
+  box-shadow: 0 20px 42px #050b1980;
+}
+.hgc-account-inline .hgc-account-dialog h2 { font-size: 21px; }
+.hgc-account-inline .hgc-account-head button { border: 1px solid #718aa5; }
+.hgc-account-page-note { margin: 22px auto 0; color: #9bb2c9; text-align: center; font-size: 11px; line-height: 1.7; }
+.hgc-account-main-tab { border-color: #c8a560; color: #ffe2ac; text-transform: none; }
+.hgc-account-main-tab[aria-selected='true'] { border-color: #ffe19e; }
+@media (max-width: 550px) {
+  .hgc-account-page { padding: 14px 10px 24px; }
+  .hgc-account-page-heading { display: block; text-align: center; }
+  .hgc-account-identity { margin: 14px auto 0; width: fit-content; }
+  .hgc-account-inline .hgc-account-dialog { padding: 14px; }
+  .hgc-account-inline .hgc-account-emblem { width: 48px; height: 48px; margin: 8px auto 4px; font-size: 16px; }
+}
