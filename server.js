@@ -34,18 +34,19 @@ const now = () => Date.now();
 
 class MiniWS {
  constructor(socket) {
-  this.socket=socket;this.buffer=Buffer.alloc(0);this.closed=false;this.onmessage=null;this.onclose=null;this.pongAt=now();
+  this.socket=socket;this.buffer=Buffer.alloc(0);this.closed=false;this.onmessage=null;this.onclose=null;this.pongAt=now();this.lastPingAt=0;this.messageWindowAt=now();this.messageCount=0;
   socket.on('data',chunk=>this.receive(chunk));socket.on('close',()=>this.onSocketClose());socket.on('end',()=>this.onSocketClose());socket.on('error',()=>this.close());
  }
  send(obj){if(this.closed)return;const data=Buffer.from(JSON.stringify(obj),'utf8');this.writeFrame(1,data);}
  writeFrame(opcode,data=Buffer.alloc(0)) {
   if(this.closed || this.socket.destroyed)return;
+  if(this.socket.writableLength>1024*1024){this.close();return;} // Slow clients must not exhaust server memory.
   const length=data.length;const head=length<126?Buffer.alloc(2):length<=65535?Buffer.alloc(4):Buffer.alloc(10);
   head[0]=0x80|opcode;
   if(length<126)head[1]=length;
   else if(length<=65535){head[1]=126;head.writeUInt16BE(length,2);}
   else{head[1]=127;head.writeBigUInt64BE(BigInt(length),2);}
-  this.socket.write(Buffer.concat([head,data]));
+  try{this.socket.write(Buffer.concat([head,data]));}catch{this.close();}
  }
  receive(chunk){
   if(this.closed)return;
@@ -53,16 +54,18 @@ class MiniWS {
   this.buffer=Buffer.concat([this.buffer,chunk]);
   while(this.buffer.length>=2){
    const b0=this.buffer[0],b1=this.buffer[1],masked=!!(b1&128),opcode=b0&15;
-   if(!(b0&128)||!masked||!(opcode===1||opcode===8||opcode===9||opcode===10)){this.close();return;}
+   if(!(b0&128)||(b0&0x70)||!masked||!(opcode===1||opcode===8||opcode===9||opcode===10)){this.close();return;}
    let length=b1&127,offset=2;
    if(length===126){if(this.buffer.length<4)return;length=this.buffer.readUInt16BE(2);offset=4;}
    else if(length===127){if(this.buffer.length<10)return;const big=this.buffer.readBigUInt64BE(2);if(big>BigInt(MAX_MESSAGE_BYTES)){this.close();return;}length=Number(big);offset=10;}
-   if(length>MAX_MESSAGE_BYTES){this.close();return;}
+   if(length>MAX_MESSAGE_BYTES||(opcode>=8&&length>125)){this.close();return;}
    if(this.buffer.length<offset+4+length)return;
    const mask=this.buffer.subarray(offset,offset+4);offset+=4;
    const payload=Buffer.from(this.buffer.subarray(offset,offset+length));
    this.buffer=this.buffer.subarray(offset+length);
    for(let i=0;i<payload.length;i++)payload[i]^=mask[i&3];
+   const current=now();if(current-this.messageWindowAt>=1000){this.messageWindowAt=current;this.messageCount=0;}
+   if(++this.messageCount>120){this.close();return;}
    if(opcode===8){this.close();return;}
    if(opcode===9){this.writeFrame(10,payload);continue;}
    if(opcode===10){this.pongAt=now();continue;}
@@ -324,6 +327,7 @@ function joinRoom(ws,code,character,skin){
 function handle(ws,data){
  if(!data||typeof data!=='object'||Array.isArray(data)||typeof data.type!=='string')return;
  if(data.type==='ping'){
+   if(now()-ws.lastPingAt<200)return;ws.lastPingAt=now();
    const nonce=Number.isSafeInteger(data.nonce)&&data.nonce>=0&&data.nonce<1e10?data.nonce:null;
    send(ws,{type:'pong',nonce});return;
  }
@@ -341,7 +345,7 @@ function handle(ws,data){
  }
  if(data.type==='ready'){
   if(p.room.status!=='lobby')return;
-  p.ready=!!data.ready;emitLobby(p.room);
+  p.ready=data.ready===true;emitLobby(p.room);
   if(p.room.players.every(q=>q&&q.ready))startMatch(p.room);
   return;
  }
@@ -358,19 +362,53 @@ function handle(ws,data){
 }
 /* HGC_ACCOUNT_API_START */
 const hgcAccountApi = require('./account-api').createAuthApi();
+let gameHtmlCache=null; // Render deploy creates a new process for every release.
 const server=http.createServer((req,res)=>{
  const requestPath=new URL(req.url,'http://localhost').pathname;
  if(requestPath.startsWith('/api/auth/')){void hgcAccountApi.handle(req,res);return;}
  if(req.method!=='GET'){res.writeHead(405);res.end();return;}
+ if(requestPath==='/api/release'){
+  res.writeHead(200,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});
+  res.end(JSON.stringify({gameVersion:'13.6',protocolVersion:'10.3',
+   commit:(process.env.RENDER_GIT_COMMIT||'').slice(0,7),
+   features:['backup-preview','recovery-snapshot','online-history-backup','release-check','online-input-throttle']}));return;
+ }
+ if(requestPath==='/release/recovery-guard.js'||requestPath==='/release/recovery-guard.css'){
+  const isJs=requestPath.endsWith('.js');
+  const filename=isJs?'recovery-guard.js':'recovery-guard.css';
+  const location=path.join(__dirname,'release',filename);
+  fs.readFile(location,(error,data)=>{
+   if(error){res.writeHead(404);res.end('Release asset unavailable');return;}
+   res.writeHead(200,{'Content-Type':isJs?'text/javascript; charset=utf-8':'text/css; charset=utf-8',
+    'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});res.end(data);
+  });return;
+ }
  if(requestPath==='/health'){
   res.writeHead(200,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});
-  res.end(JSON.stringify({ok:true,version:'10.3',rooms:rooms.size,players:clients.size}));return;
+  res.end(JSON.stringify({ok:true,version:'10.3',gameVersion:'13.6',rooms:rooms.size,players:clients.size}));return;
  }
  if(requestPath!=='/'&&requestPath!=='/index.html'){res.writeHead(404);res.end('Not found');return;}
+ const respond=(html)=>{
+  res.writeHead(200,{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Referrer-Policy':'no-referrer'});
+  res.end(html);
+ };
  const file=path.join(__dirname,'index.html');
- fs.readFile(file,(error,data)=>{
-  if(error){res.writeHead(500);res.end('Game unavailable');return;}
-  res.writeHead(200,{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Referrer-Policy':'no-referrer'});res.end(data);
+ fs.stat(file,(statError,stats)=>{
+  if(statError){res.writeHead(500);res.end('Game unavailable');return;}
+  if(gameHtmlCache && gameHtmlCache.mtimeMs===stats.mtimeMs && gameHtmlCache.size===stats.size){respond(gameHtmlCache.html);return;}
+  fs.readFile(file,(error,data)=>{
+   if(error){res.writeHead(500);res.end('Game unavailable');return;}
+   let html=data.toString('utf8');
+  // Legacy v13.4 HTML can be upgraded without reuploading its 7.2MB image bundle.
+  if(!html.includes('data-hgc135="bundle"')){
+   html=html.replaceAll('13.4-arcade-visual-unified','13.6-stability-recovery');
+   html=html.replace('CHRONICLE ARSENAL / V13.4','CHRONICLE ARSENAL / V13.6');
+   html=html.replace('</head>','<link rel="stylesheet" href="/release/recovery-guard.css" data-hgc135="asset"></head>');
+   html=html.replace('</body>','<script src="/release/recovery-guard.js" defer data-hgc135="asset"></script></body>');
+  }
+   gameHtmlCache={html,mtimeMs:stats.mtimeMs,size:stats.size};
+   respond(html);
+  });
  });
 });
 server.on('upgrade',(req,socket,head)=>{
@@ -386,9 +424,10 @@ server.on('upgrade',(req,socket,head)=>{
   if(req.headers.upgrade?.toLowerCase()!=='websocket'||req.headers['sec-websocket-version']!=='13'||!String(req.headers['sec-websocket-key']||'').match(/^[A-Za-z0-9+/]{22}==$/)){
     socket.destroy();return;
   }
+  if(clients.size>=160){socket.write('HTTP/1.1 503 Service Unavailable\r\nConnection: close\r\n\r\n');socket.destroy();return;}
   const key=req.headers['sec-websocket-key'];const accept=crypto.createHash('sha1').update(key+'258EAFA5-E914-47DA-95CA-C5AB0DC85B11').digest('base64');
   socket.write('HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Accept: '+accept+'\r\n\r\n');
-  if(clients.size>=160){socket.destroy();return;}
+
   const ws=new MiniWS(socket);clients.add(ws);
   ws.onmessage=d=>handle(ws,d);ws.onclose=()=>{if(ws.player)leaveRoom(ws.player);};
   ws.send({type:'hello',version:'10.3',features:['stage','leave','ping','cosmetics'],characters:[...STATS.keys()]});
@@ -397,8 +436,10 @@ server.on('upgrade',(req,socket,head)=>{
 });
 const tick=setInterval(()=>{for(const room of rooms.values())stepMatch(room);},TICK_MS);
 const pulse=setInterval(()=>{for(const ws of [...clients]){if(now()-ws.pongAt>40000)ws.close();else ws.writeFrame(9,Buffer.from('hgc'));}},15000);
+let stopping=false;function shutdown(){if(stopping)return;stopping=true;clearInterval(tick);clearInterval(pulse);for(const ws of [...clients])ws.close();server.close();}
+process.once('SIGTERM',shutdown);process.once('SIGINT',shutdown);
 server.listen(PORT,HOST,()=>{
- console.log(`Historical Genius Clash v10.3 server started: http://localhost:${PORT}`);
+ console.log(`Historical Genius Clash v13.6 game / 10.3 online server started: http://localhost:${PORT}`);
  console.log('Server stays online while this terminal is open.');
  for(const iface of Object.values(os.networkInterfaces())){
   for(const addr of iface||[]){if(addr.family==='IPv4'&&!addr.internal){console.log(`Same Wi-Fi devices: http://${addr.address}:${PORT}`);}}

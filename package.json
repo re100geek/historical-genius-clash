@@ -1,11 +1,11 @@
 {
   "name": "historical-genius-clash-online",
-  "version": "13.4.0",
+  "version": "13.6.0",
   "private": true,
-  "description": "Historical Genius Clash v13.4 — Chronicle Arsenal pixel weapon reference + unified arcade theme",
+  "description": "Historical Genius Clash v13.6 — Stability & Recovery: gameplay hardening, online transport and safe backup",
   "scripts": {
     "start": "node server.js",
-   "check": "node --check server.js && node --check account-api.js && node --check account-store.js",
+    "check": "node --check server.js && node --check account-api.js && node --check account-store.js && node --check release/recovery-guard.js",
     "test": "node --test tests/account.test.js tests/integration.test.js"
   },
   "engines": {

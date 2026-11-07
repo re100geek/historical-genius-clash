@@ -1,0 +1,37 @@
+/* HGC v13.5 settings: navy/gold arcade presentation shared with v13.4. */
+.hgc135-panel {
+  margin: 14px 0 20px;
+  padding: 17px;
+  border: 2px solid #a88450;
+  border-bottom: 4px solid #d2a76c;
+  background: linear-gradient(135deg, #161f37, #0d1425);
+  color: #f9ecce;
+  box-shadow: inset 0 0 0 2px #29334d, 0 6px 17px #05081688;
+}
+.hgc135-panel h3 { margin: 0 0 8px; color: #f5cf89; font: 800 17px/1.35 monospace; }
+.hgc135-panel p { margin: 0 0 12px; color: #d1dbe5; line-height: 1.6; }
+.hgc135-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.hgc135-actions button { min-height: 42px; cursor: pointer; }
+.hgc135-actions button:disabled { opacity: .45; cursor: not-allowed; }
+#hgc135ReleaseStatus {
+  margin-top: 12px;
+  padding: 9px 12px;
+  border-left: 3px solid #c8a366;
+  background: #0b1323;
+  color: #dbedf4;
+  font-size: 12px;
+  line-height: 1.6;
+}
+.hgc135-preview {
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid #d5a45f;
+  background: #20263c;
+}
+.hgc135-preview strong { display: block; margin-bottom: 8px; color: #f5d49b; }
+.hgc135-preview p { font-size: 12px; }
+.hgc135-preview[hidden] { display: none !important; }
+@media (max-width: 520px) {
+  .hgc135-panel { padding: 12px; }
+  .hgc135-actions button { flex: 1 1 100%; }
+}

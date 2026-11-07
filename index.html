@@ -2783,9 +2783,49 @@ input[type=text],input:not([type]),select,textarea {
 .gacha-catalog-item strong {min-height:27px;line-height:1.35;}
 
 </style>
+<style data-hgc135="bundle">
+/* HGC v13.5 settings: navy/gold arcade presentation shared with v13.4. */
+.hgc135-panel {
+  margin: 14px 0 20px;
+  padding: 17px;
+  border: 2px solid #a88450;
+  border-bottom: 4px solid #d2a76c;
+  background: linear-gradient(135deg, #161f37, #0d1425);
+  color: #f9ecce;
+  box-shadow: inset 0 0 0 2px #29334d, 0 6px 17px #05081688;
+}
+.hgc135-panel h3 { margin: 0 0 8px; color: #f5cf89; font: 800 17px/1.35 monospace; }
+.hgc135-panel p { margin: 0 0 12px; color: #d1dbe5; line-height: 1.6; }
+.hgc135-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.hgc135-actions button { min-height: 42px; cursor: pointer; }
+.hgc135-actions button:disabled { opacity: .45; cursor: not-allowed; }
+#hgc135ReleaseStatus {
+  margin-top: 12px;
+  padding: 9px 12px;
+  border-left: 3px solid #c8a366;
+  background: #0b1323;
+  color: #dbedf4;
+  font-size: 12px;
+  line-height: 1.6;
+}
+.hgc135-preview {
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid #d5a45f;
+  background: #20263c;
+}
+.hgc135-preview strong { display: block; margin-bottom: 8px; color: #f5d49b; }
+.hgc135-preview p { font-size: 12px; }
+.hgc135-preview[hidden] { display: none !important; }
+@media (max-width: 520px) {
+  .hgc135-panel { padding: 12px; }
+  .hgc135-actions button { flex: 1 1 100%; }
+}
+
+</style>
 </head>
 <body><main id="app">
-<header><h1>HISTORICAL<br>GENIUS CLASH</h1><div class="subtitle">CHRONICLE ARSENAL / V13.4 · 13 FIGHTERS / ONLINE 1V1</div><div class="header-rule"></div><button id="profileShortcut" class="gold-shortcut profile-shortcut" type="button" title="프로필과 업적 보기">▣ PROFILE</button><button id="goldShortcut" class="gold-shortcut" type="button" title="상점과 보유 무기 보기"><span aria-hidden="true">◈</span> GOLD <strong id="goldBalance">0</strong></button></header>
+<header><h1>HISTORICAL<br>GENIUS CLASH</h1><div class="subtitle">CHRONICLE ARSENAL / V13.6 · 13 FIGHTERS / ONLINE 1V1</div><div class="header-rule"></div><button id="profileShortcut" class="gold-shortcut profile-shortcut" type="button" title="프로필과 업적 보기">▣ PROFILE</button><button id="goldShortcut" class="gold-shortcut" type="button" title="상점과 보유 무기 보기"><span aria-hidden="true">◈</span> GOLD <strong id="goldBalance">0</strong></button></header>
 <section id="select" class="panel">
 <div class="section-kicker">✦ SELECT YOUR HISTORICAL CHAMPION ✦</div>
 <div class="tab-bar" role="tablist" aria-label="게임 메뉴">
@@ -7112,6 +7152,7 @@ const ArcadeStageOverlay = (() => {
     const padHeld=[Object.create(null),Object.create(null)];
     const padLast=[Object.create(null),Object.create(null)];
     const oneShotKeys = new Set(['attack', 'strong', 'special', 'dash', 'dodge']);
+    const touchHolds=new Map();
 
     function setKey(playerNumber, key, value) {
       const index = playerNumber === 2 ? 1 : 0;
@@ -7174,11 +7215,13 @@ const ArcadeStageOverlay = (() => {
         button.addEventListener('pointerdown', (event) => {
           event.preventDefault();
           try { button.setPointerCapture(event.pointerId); } catch (_) {}
+          const held=touchHolds.get(button)||new Set();held.add(event.pointerId);touchHolds.set(button,held);
           setKey(playerNumber, key, true);
         });
         ['pointerup', 'pointerleave', 'pointercancel', 'lostpointercapture'].forEach((eventName) => {
-          button.addEventListener(eventName, () => {
-            if (!oneShotKeys.has(key)) setKey(playerNumber, key, false);
+          button.addEventListener(eventName, (event) => {
+            const held=touchHolds.get(button);if(held)held.delete(event.pointerId);
+            if (!oneShotKeys.has(key) && (!held || held.size===0)) setKey(playerNumber, key, false);
           });
         });
         button.addEventListener('click', (event) => {
@@ -8394,7 +8437,8 @@ const ArcadeStageOverlay = (() => {
       'historicalGeniusClash.goldAndSkins.v1','historicalGeniusClash.storyProgress.v1',
       'historicalGeniusClash.keyBindings.v1','historicalGeniusClash.soundSettings.v1',
       'historicalGeniusClash.profile.v1','historicalGeniusClash.lastReplay.v1','historicalGeniusClash.visualSettings.v1',
-      'historicalGeniusClash.cinematics.v1','historicalGeniusClash.controlComfort.v1'
+      'historicalGeniusClash.cinematics.v1','historicalGeniusClash.controlComfort.v1',
+      'historicalGeniusClash.onlineRecords.v10.3'
     ];
     const status=msg=>{$('#backupStatus').textContent=msg;};
     function exportBackup(){
@@ -8504,7 +8548,7 @@ const ArcadeStageOverlay = (() => {
         assert('v9.4.1 필살기 텍스트 레이어 추가',!!$('#specialArtNotice')&&$('#specialArtNotice').hidden);
         assert('v9.4.1 경기별 컷인 사용 기록',typeof SpecialCutinModule.resetMatch==='function'&&typeof SpecialCutinModule.seen==='function'&&!SpecialCutinModule.seen('alexander'));
         assert('v9.4.1 작은 텍스트 알림 스타일',Array.from(document.styleSheets).some(sheet=>{try{return [...sheet.cssRules].some(r=>r.selectorText?.includes('special-art-notice'))}catch{return false}}));
-        assert('v10.4 API 버전 및 라이벌 경로 노출',HistoricalGeniusClash.version==='13.4-arcade-visual-unified'&&typeof HistoricalGeniusClash.routes.route==='function');
+        assert('v10.4 API 버전 및 라이벌 경로 노출',HistoricalGeniusClash.version==='13.6-stability-recovery'&&typeof HistoricalGeniusClash.routes.route==='function');
         assert('v10.1 온라인 입장·방 코드·준비 UI',!!$('#onlineEnter')&&!!$('#onlineRoomCode')&&!!$('#onlineReady')&&!!$('#onlineBattle'));
         assert('v10.1 온라인 선택 캐릭터 13명',document.querySelectorAll('#onlineCharacter option').length===roster.length);
         assert('v10.1 온라인 전장 10종',document.querySelectorAll('#onlineStage option').length===StageModule.catalog.length);
@@ -8695,8 +8739,8 @@ const ArcadeStageOverlay = (() => {
     const pressedPointers=new Map();
     let sock=null,room='',slot=null,mode='offline',latest=null,active=false,raf=0,sendTimer=0,stamp=0,drawTick=0;
     let character='newton',lastError='',lastEvents=[],drawPositions=[],gameResult=null;
-    let freshPress=Object.create(null),lastSentKeys='';
-    let latency=-1, pingNonce=0, pendingPing=null, pingTimer=0, reconnectRoom='', leaving=false;
+    let freshPress=Object.create(null),lastSentKeys='',lastInputTransmission=0;
+    let latency=-1, pingNonce=0, pendingPing=null, pingTimer=0, reconnectRoom='', leaving=false, reconnectFallbackPending=false;
     let impactParticles=[],shakePower=0,flashPower=0,specialCutin=null,savedOnlineVolume=70,onlineReducedFx=false;
     let countdownAt=0,onlineMatchNumber=0,resultSceneAt=-1,resultSceneSkipped=false,lastResultKey='',onlineRecord={played:0,wins:0,losses:0,draws:0};
     const ONLINE_RECORD_KEY='historicalGeniusClash.onlineRecords.v10.3';
@@ -8776,8 +8820,8 @@ const ArcadeStageOverlay = (() => {
     function tryReconnect(){const previous=room||reconnectRoom;const character=$id('onlineCharacter').value;reconnectRoom=previous;
       if(sock){try{sock.close();}catch{}sock=null;}
       setConnectionBadge('재접속 중');$id('onlineReconnect').hidden=true;
-      if(previous&&previous.length===6){localRoomReset();$id('onlineRoomCode').value=previous;connect({type:'join',room:previous,character});}
-      else connect();}
+      if(previous&&previous.length===6){localRoomReset();reconnectFallbackPending=true;$id('onlineRoomCode').value=previous;connect({type:'join',room:previous,character});}
+      else {reconnectFallbackPending=false;connect();}}
 
     const send=(data)=>{if(sock?.readyState===WebSocket.OPEN){sock.send(JSON.stringify(data));return true;}return false;};
     const serverAddress=()=>{
@@ -8811,7 +8855,7 @@ const ArcadeStageOverlay = (() => {
     const updateConnectionHint=()=>{
       const hint=$id('onlineSetupHint');hint.textContent=offlineNote();hint.classList.toggle('warning',location.protocol==='file:');
     };
-    const resetInput=()=>{for(const key of clientKeys){input[key]=false;freshPress[key]=false;}pressedPointers.clear();};
+    const resetInput=()=>{for(const key of clientKeys){input[key]=false;freshPress[key]=false;}pressedPointers.clear();lastSentKeys='';lastInputTransmission=0;};
     const onlineActive=()=>active&&panel.hidden===false;
     function show(){
       if($('#game').style.display==='block')GameModule.backToSelection();
@@ -8950,7 +8994,7 @@ const ArcadeStageOverlay = (() => {
       switch(data.type){
         case 'hello': if(data.version!=='10.3')showMessage('서버 버전이 다릅니다. 서버의 server.js도 v10.3으로 교체해주세요.',true);break;
         case 'joined':
-          room=data.room;slot=data.slot;mode='lobby';leaving=false;reconnectRoom='';gameResult=null;latest=null;impactParticles=[];lastEvents=[];seenSpecials.clear();renderOnlineRecord();refreshOnlineRoster();
+          room=data.room;slot=data.slot;mode='lobby';leaving=false;reconnectRoom='';reconnectFallbackPending=false;gameResult=null;latest=null;impactParticles=[];lastEvents=[];seenSpecials.clear();renderOnlineRecord();refreshOnlineRoster();
           $id('onlineLeaveRoom').hidden=false;$id('onlineLeaveRoom').disabled=false;$id('onlineLeaveBattle').hidden=false;$id('onlineReconnect').hidden=true;
           if(location.hash!=='#room='+room)history.replaceState(null,'',location.pathname+location.search+'#room='+room);
           $id('onlineRoomCode').value=room;$id('onlineRoomInfo').hidden=false;
@@ -8980,7 +9024,14 @@ const ArcadeStageOverlay = (() => {
           mode='finished';gameResult=data.reason==='disconnect'?'상대가 방을 나갔습니다.':' '+winLabel(data.winner);rememberOnlineResult(data);showResult();
           AudioModule.sfx(data.winner===slot?'victory':'ko');break;
         case 'pong':if(pendingPing&&data.nonce===pendingPing.nonce){latency=Math.round(performance.now()-pendingPing.at);pendingPing=null;updateLatency();}break;
-        case 'error':showMessage(data.message||'온라인 서버 오류',true);break;
+        case 'error':
+          if(reconnectFallbackPending && ['해당 방을 찾지 못했습니다.','입장 가능한 방이 아닙니다.'].includes(data.message)){
+            reconnectFallbackPending=false;
+            reconnectRoom='';
+            const created=send({type:'create',character:$id('onlineCharacter').value,stage:$id('onlineStage').value,skin:selectedSkin()});
+            showMessage(created?'이전 방이 종료되어 새 방을 생성합니다. 새 방 코드를 친구에게 공유하세요.':'새 방 연결에 실패했습니다.',!created);
+          }else showMessage(data.message||'온라인 서버 오류',true);
+          break;
         case 'left':localRoomReset();showMessage('방에서 나왔습니다. 새 방 만들기 또는 코드로 참가할 수 있습니다.');break;
         case 'opponent_left':showMessage('상대 플레이어가 방을 나갔습니다. 다른 친구를 초대하거나 방을 나가세요.');break;
       }
@@ -9014,7 +9065,12 @@ const ArcadeStageOverlay = (() => {
     function transmitInput(){
       if(mode!=='running'||!sock||sock.readyState!==WebSocket.OPEN||panel.hidden)return;
       const keys={};for(const k of clientKeys)keys[k]=!!input[k]||!!freshPress[k];
-      send({type:'input',keys});
+      const signature=JSON.stringify(keys),time=performance.now();
+      if(signature!==lastSentKeys||time-lastInputTransmission>=150){
+        if(send({type:'input',keys})){
+          lastSentKeys=signature;lastInputTransmission=time;
+        }
+      }
       for(const k of oneShots){freshPress[k]=false;if(!pressedPointers.has(k))input[k]=false;}
     }
     function press(key,down){
@@ -9296,8 +9352,15 @@ const ArcadeStageOverlay = (() => {
       window.addEventListener('blur',resetInput);document.addEventListener('visibilitychange',()=>{if(document.hidden)resetInput();});
       panel.querySelectorAll('[data-online-key]').forEach(button=>{
         const key=button.dataset.onlineKey;
-        button.addEventListener('pointerdown',event=>{event.preventDefault();button.setPointerCapture?.(event.pointerId);pressedPointers.set(key,true);press(key,true);});
-        for(const eventName of ['pointerup','pointercancel','lostpointercapture','pointerleave'])button.addEventListener(eventName,()=>{pressedPointers.delete(key);press(key,false);});
+        button.addEventListener('pointerdown',event=>{
+          event.preventDefault();try{button.setPointerCapture?.(event.pointerId);}catch{}
+          const pointers=pressedPointers.get(key)||new Set();pointers.add(event.pointerId);pressedPointers.set(key,pointers);press(key,true);
+        });
+        for(const eventName of ['pointerup','pointercancel','lostpointercapture','pointerleave'])button.addEventListener(eventName,event=>{
+          const pointers=pressedPointers.get(key);if(!pointers)return;
+          pointers.delete(event.pointerId);
+          if(!pointers.size){pressedPointers.delete(key);press(key,false);}
+        });
       });
     }
     return Object.freeze({mount,show,hide,createRoom,joinRoom,serverAddress,state:()=>({room,slot,mode,latest,active}),diagnostic:connectionFailure,send});
@@ -9333,7 +9396,7 @@ const ArcadeStageOverlay = (() => {
     ultimateArt: Object.freeze({ids: UltimateVisualV13.ids, ready: UltimateVisualV13.ready}),
     arcadeVisuals:Object.freeze({weaponCount:ArcadeWeaponVisuals.count,weaponReady:ArcadeWeaponVisuals.ready,
       loaded:ArcadeWeaponVisuals.loaded,characters:ArcadeWeaponVisuals.characters}),
-    version: '13.4-arcade-visual-unified',
+    version: '13.6-stability-recovery',
     characters: roster.map(({ id, name }) => ({ id, name })),
     start: GameModule.start,
     returnToSelection: GameModule.backToSelection,
@@ -9523,7 +9586,7 @@ const ArcadeStageOverlay = (() => {
     const data = {};
     for (let index = 0; index < localStorage.length; index += 1) {
       const key = localStorage.key(index);
-      if (!key || !key.startsWith(STORAGE_PREFIX)) continue;
+      if (!key || !key.startsWith(STORAGE_PREFIX) || key === 'historicalGeniusClash.recoveryGuard.v1') continue;
       const value = localStorage.getItem(key);
       if (value && value.length <= 36000) {
         try { JSON.parse(value); data[key] = value; } catch { /* Skip non-JSON values. */ }
@@ -9559,10 +9622,10 @@ const ArcadeStageOverlay = (() => {
     const original = {};
     for (let index = 0; index < localStorage.length; index += 1) {
       const key = localStorage.key(index);
-      if (key?.startsWith(STORAGE_PREFIX)) original[key] = localStorage.getItem(key);
+      if (key?.startsWith(STORAGE_PREFIX) && key !== 'historicalGeniusClash.recoveryGuard.v1') original[key] = localStorage.getItem(key);
     }
     for (const [key, value] of Object.entries(profile.data)) {
-      if (!key.startsWith(STORAGE_PREFIX) || typeof value !== 'string') {
+      if (!key.startsWith(STORAGE_PREFIX) || key === 'historicalGeniusClash.recoveryGuard.v1' || typeof value !== 'string') {
         throw new Error('서버 데이터 형식 오류');
       }
       JSON.parse(value);
@@ -9634,6 +9697,276 @@ const ArcadeStageOverlay = (() => {
   window.HGCAccount = Object.freeze({open, refresh, get state() {
     return {account: state.account, revision: state.revision, available: state.available};
   }});
+})();
+
+</script>
+<script data-hgc135="bundle">
+/* Historical Genius Clash v13.5 — optional, independent settings extension.
+ * Preserves existing localStorage save keys and multiplayer protocol.
+ */
+(() => {
+  'use strict';
+
+  const GAME_VERSION = '13.6';
+  const RECOVERY_KEY = 'historicalGeniusClash.recoveryGuard.v1';
+  const SAVE_KEYS = Object.freeze([
+    'historicalGeniusClash.goldAndSkins.v1',
+    'historicalGeniusClash.storyProgress.v1',
+    'historicalGeniusClash.keyBindings.v1',
+    'historicalGeniusClash.soundSettings.v1',
+    'historicalGeniusClash.profile.v1',
+    'historicalGeniusClash.lastReplay.v1',
+    'historicalGeniusClash.visualSettings.v1',
+    'historicalGeniusClash.cinematics.v1',
+    'historicalGeniusClash.controlComfort.v1',
+    'historicalGeniusClash.onlineRecords.v10.3',
+  ]);
+  const MAX_BYTES = 3_100_000;
+  const MAX_RECORD_CHARS = 2_000_000;
+  const view = {pending: null};
+  const $ = (selector) => document.querySelector(selector);
+  const status = (message) => {
+    const target = $('#backupStatus');
+    if (target) target.textContent = message;
+  };
+
+  const readCurrent = () => Object.fromEntries(SAVE_KEYS.map((key) => [key, localStorage.getItem(key)]));
+
+  const validate = (input) => {
+    if (!input || input.schema !== 'hgc-backup-1' || !input.records ||
+      typeof input.records !== 'object' || Array.isArray(input.records)) {
+      throw new Error('HGC 게임 백업 파일을 선택하세요.');
+    }
+    const entries = Object.entries(input.records);
+    if (!entries.length) throw new Error('백업 파일에 복원할 기록이 없습니다.');
+    if (entries.some(([key]) => !SAVE_KEYS.includes(key))) {
+      throw new Error('지원하지 않는 저장 항목이 포함돼 있습니다.');
+    }
+    const size = entries.reduce((total, [,value]) => total + String(value).length, 0);
+    if (size > MAX_BYTES) throw new Error('백업 데이터가 3MB 제한을 초과했습니다.');
+    for (const [,value] of entries) {
+      if (typeof value !== 'string' || value.length > MAX_RECORD_CHARS) {
+        throw new Error('저장 데이터의 길이나 형식이 올바르지 않습니다.');
+      }
+      JSON.parse(value);
+    }
+    return entries;
+  };
+
+  const summary = (records) => {
+    const key = 'historicalGeniusClash.goldAndSkins.v1';
+    let economy = {};
+    try {
+      economy = JSON.parse(records[key] || '{}') || {};
+    } catch {
+      economy = {};
+    }
+    const gold = Number.isFinite(Number(economy.gold)) ?
+      Math.max(0, Math.floor(Number(economy.gold))) : 0;
+    const owned = Array.isArray(economy.owned) ? economy.owned.length : 0;
+    let online = '';
+    try {
+      const data = JSON.parse(records['historicalGeniusClash.onlineRecords.v10.3'] || '{}');
+      if (Number.isSafeInteger(data.played) && data.played >= 0) online = ` · 온라인 ${data.played}전`;
+    } catch { /* Old snapshots may not contain online records. */ }
+    return `${Object.keys(records).length}개 항목 · 골드 ${gold} · 수집 무기 ${owned}종${online}`;
+  };
+
+  const writeTransaction = (records) => {
+    const before = readCurrent();
+    try {
+      for (const [key, value] of Object.entries(records)) {
+        if (value === null) localStorage.removeItem(key);
+        else localStorage.setItem(key, value);
+      }
+    } catch (error) {
+      for (const [key, value] of Object.entries(before)) {
+        try {
+          if (value === null) localStorage.removeItem(key);
+          else localStorage.setItem(key, value);
+        } catch {
+          // The rollback snapshot is kept in RECOVERY_KEY for a later retry.
+        }
+      }
+      throw error;
+    }
+  };
+
+  const availableRecovery = () => {
+    try {
+      const saved = JSON.parse(localStorage.getItem(RECOVERY_KEY) || 'null');
+      if (!saved || saved.schema !== 'hgc-recovery-1' || !saved.records) return null;
+      if (!SAVE_KEYS.every((key) => Object.hasOwn(saved.records, key))) return null;
+      for (const key of SAVE_KEYS) {
+        const value = saved.records[key];
+        if (value !== null && typeof value !== 'string') return null;
+      }
+      return saved;
+    } catch {
+      return null;
+    }
+  };
+
+  const recoveryButtonState = () => {
+    const button = $('#hgc135Recover');
+    if (button) button.disabled = !availableRecovery();
+  };
+
+  const cancelPreview = () => {
+    view.pending = null;
+    const panel = $('#hgc135Preview');
+    if (panel) panel.hidden = true;
+  };
+
+  const openPreview = (payload) => {
+    const entries = validate(payload);
+    view.pending = {entries, payload};
+    const panel = $('#hgc135Preview');
+    $('#hgc135PreviewSummary').textContent = `파일: ${summary(payload.records)}`;
+    $('#hgc135CurrentSummary').textContent = `현재: ${summary(Object.fromEntries(
+      Object.entries(readCurrent()).filter(([,value]) => value !== null)))};
+      복원 전에 현재 기록을 기기에 보관합니다.`;
+    panel.hidden = false;
+    status('백업을 검사했습니다. 아래 미리보기를 확인하고 복원을 승인하세요.');
+  };
+
+  const commitRestore = () => {
+    if (!view.pending) return;
+    try {
+      const snapshot = {schema: 'hgc-recovery-1', savedAt: new Date().toISOString(), records: readCurrent()};
+      localStorage.setItem(RECOVERY_KEY, JSON.stringify(snapshot));
+      if (!availableRecovery()) throw new Error('복구용 기록을 확인할 수 없습니다.');
+      const count = view.pending.entries.length;
+      writeTransaction(Object.fromEntries(view.pending.entries));
+      cancelPreview();
+      recoveryButtonState();
+      status(`${count}개 항목을 복원했습니다. 기존 기록도 기기에 보관했습니다. 게임을 새로고침해 적용하세요.`);
+    } catch (error) {
+      status(`복원 중단: ${error.message}. 기존 기록은 유지됩니다.`);
+    }
+  };
+
+  const restoreRecovery = () => {
+    const saved = availableRecovery();
+    if (!saved) return status('복구할 이전 기록이 없습니다.');
+    const priorRecovery = localStorage.getItem(RECOVERY_KEY);
+    try {
+      // First store a reversible snapshot. If storage is full, the active save is untouched.
+      localStorage.setItem(RECOVERY_KEY, JSON.stringify({
+        schema: 'hgc-recovery-1', savedAt: new Date().toISOString(), records: readCurrent(),
+      }));
+      try {
+        writeTransaction(saved.records);
+      } catch (error) {
+        localStorage.setItem(RECOVERY_KEY, priorRecovery);
+        throw error;
+      }
+      recoveryButtonState();
+      status('이전 기록을 복구했습니다. 게임을 새로고침해 적용하세요.');
+    } catch (error) {
+      status(`이전 기록 복구 실패: ${error.message}`);
+    }
+  };
+
+  const checkRelease = async () => {
+    const target = $('#hgc135ReleaseStatus');
+    target.textContent = '서버 버전을 확인하고 있습니다…';
+    try {
+      const response = await fetch('/api/release', {cache: 'no-store'});
+      if (!response.ok) throw new Error(`서버 응답 ${response.status}`);
+      const data = await response.json();
+      if (data.gameVersion !== GAME_VERSION) {
+        target.textContent = `서버 ${data.gameVersion || '알 수 없음'} · 현재 화면 v${GAME_VERSION} · 버전 불일치`;
+        return;
+      }
+      const commit = /^[0-9a-f]{7}$/i.test(data.commit || '') ? ` · 커밋 ${data.commit}` : '';
+      target.textContent = `게임 v${GAME_VERSION} / 온라인 규칙 ${data.protocolVersion || '미확인'}${commit} · 최신 연결 확인`;
+    } catch {
+      target.textContent = '온라인 버전 확인에 실패했습니다. 게임은 오프라인 모드에서도 사용할 수 있습니다.';
+    }
+  };
+
+  const install = () => {
+    const backup = $('#backupExport')?.closest('.evo-panel');
+    if (!backup || $('#hgc135Panel')) return;
+    const panel = document.createElement('section');
+    panel.id = 'hgc135Panel';
+    panel.className = 'hgc135-panel';
+    panel.innerHTML = `
+      <h3>v13.6 · 안정성 · 기록 보호 · 배포 확인</h3>
+      <p>백업 파일을 먼저 검사합니다. 복원 전에 현재 기록을 별도로 보관합니다.</p>
+      <div class="hgc135-actions">
+        <button id="hgc135Recover" class="btn alt" type="button" disabled>직전 기록 되돌리기</button>
+        <button id="hgc135CheckRelease" class="btn alt" type="button">게임 버전 확인</button>
+        <button id="hgc135Refresh" class="btn alt" type="button">새 버전 다시 불러오기</button>
+      </div>
+      <div id="hgc135ReleaseStatus" role="status" aria-live="polite">게임 v13.6 · 서버 확인 전</div>
+      <div id="hgc135Preview" class="hgc135-preview" hidden>
+        <strong>복원 내용 미리보기</strong>
+        <p id="hgc135PreviewSummary"></p>
+        <p id="hgc135CurrentSummary"></p>
+        <div class="hgc135-actions">
+          <button id="hgc135Confirm" class="btn" type="button">이 파일로 복원하기</button>
+          <button id="hgc135Cancel" class="btn alt" type="button">취소</button>
+        </div>
+      </div>`;
+    backup.insertAdjacentElement('afterend', panel);
+    $('#hgc135Confirm').addEventListener('click', commitRestore);
+    $('#hgc135Cancel').addEventListener('click', cancelPreview);
+    $('#hgc135Recover').addEventListener('click', restoreRecovery);
+    $('#hgc135Panel h3').textContent = 'v13.6 · 안정성 · 기록 보호 · 배포 확인';
+    $('#hgc135CheckRelease').addEventListener('click', checkRelease);
+    $('#hgc135Refresh').addEventListener('click', () => {
+      const target = new URL(location.href);
+      target.searchParams.set('hgc_refresh', String(Date.now()));
+      location.assign(target.href);
+    });
+    recoveryButtonState();
+    checkRelease();
+  };
+
+  // Account download can replace every game save; keep a durable rollback first.
+  document.addEventListener('click', (event) => {
+    const button = event.target.closest?.('[data-sync="download"]');
+    if (!button || button.disabled) return;
+    try {
+      const records = readCurrent();
+      if (!Object.values(records).some(value => value !== null)) return;
+      const snapshot = {schema: 'hgc-recovery-1', savedAt: new Date().toISOString(), records};
+      localStorage.setItem(RECOVERY_KEY, JSON.stringify(snapshot));
+      if (!availableRecovery()) throw new Error('복원 지점 검증 실패');
+      recoveryButtonState();
+      status('계정 기록을 가져오기 전에 기존 기록의 복원 지점을 저장했습니다.');
+    } catch (error) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      status('계정 기록 가져오기를 중단했습니다: '+error.message);
+    }
+  }, true);
+
+  // Capture before the legacy file-input handler: previously it restored immediately.
+  document.addEventListener('change', async (event) => {
+    if (event.target?.id !== 'backupImport') return;
+    event.stopImmediatePropagation();
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) return;
+    if (file.size > MAX_BYTES) return status('복원 실패: 3MB 이하의 JSON 파일을 선택하세요.');
+    try {
+      openPreview(JSON.parse(await file.text()));
+    } catch (error) {
+      cancelPreview();
+      status(`백업 검사 실패: ${error.message}`);
+    }
+  }, true);
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', install, {once: true});
+  } else {
+    install();
+  }
+  window.HGCRecoveryGuard = Object.freeze({version: GAME_VERSION, validate, summary,
+    availableRecovery, install, checkRelease});
 })();
 
 </script>
