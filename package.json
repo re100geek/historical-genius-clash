@@ -5,7 +5,7 @@
   "description": "Historical Genius Clash v13.4 — Chronicle Arsenal pixel weapon reference + unified arcade theme",
   "scripts": {
     "start": "node server.js",
-   "check": "node --check server.js && node --check account-api.js && node --check account-store.js"
+   "check": "node --check server.js && node --check account-api.js && node --check account-store.js",
     "test": "node --test tests/account.test.js tests/integration.test.js"
   },
   "engines": {
