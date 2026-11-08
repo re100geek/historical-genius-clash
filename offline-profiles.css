@@ -1,0 +1,18 @@
+/* Shared HGC navy / warm gold art direction, added to the existing account tab. */
+.hgc-local-vault{margin:16px 0 22px;border:2px solid #b48d59;background:linear-gradient(125deg,#121a31,#1b233a);padding:16px 18px;color:#f7ebd0}
+.hgc-local-vault h3{font-size:20px;color:#ffdc9c;margin:0 0 6px}
+.hgc-local-vault h4{margin:8px 0;color:#e9d2a9}
+.hgc-local-vault p{font-size:13px;line-height:1.6;color:#b8cee2;margin:8px 0}
+.hgc-local-vault .hgc-local-alert{color:#e8bc83}
+.hgc-local-vault form{display:grid;gap:7px;max-width:540px}
+.hgc-local-vault label{font-weight:700;color:#dec79f}
+.hgc-local-vault input{background:#0b1121;border:1px solid #83704c;border-radius:4px;color:#eaf2f7;padding:10px;font:inherit;max-width:100%}
+.hgc-local-buttons{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.hgc-local-vault button{min-height:40px;background:#223852;color:#f8dfaa;border:1px solid #a68a5a;padding:8px 12px;cursor:pointer;border-radius:4px;font-weight:700}
+.hgc-local-vault button:hover{background:#304a61}
+.hgc-local-vault button:focus-visible{outline:2px solid #8ce7e7;outline-offset:2px}
+.hgc-local-entry{display:flex;gap:12px;justify-content:space-between;align-items:center;padding:10px 6px;border-bottom:1px solid #4a5266;flex-wrap:wrap}
+.hgc-local-entry span{font-size:13px;color:#d1e1eb}
+.hgc-local-status{color:#9de7c8;min-height:20px;font-size:13px;line-height:1.6}
+.hgc-local-vault [hidden]{display:none!important}
+@media(max-width:480px){.hgc-local-vault{padding:12px}.hgc-local-vault button{width:100%}.hgc-local-entry{display:block}}
