@@ -1,0 +1,160 @@
+[
+  {
+    "viewport": "390x844",
+    "errors": [],
+    "metrics": {
+      "version": "14.4.41",
+      "game": "block",
+      "status": "P1 FIGHT",
+      "timer": "96",
+      "fx": {
+        "spark": 5,
+        "slash": 5,
+        "parry": 0,
+        "dust": 1,
+        "effects": 0
+      },
+      "snapshot": {
+        "mode": "cpu",
+        "difficulty": "normal",
+        "ended": false,
+        "frame": 232,
+        "players": [
+          {
+            "id": "newton",
+            "ai": false,
+            "hp": 1012,
+            "energy": 30,
+            "x": 287,
+            "attack": "",
+            "guard": false,
+            "motion": "idle",
+            "behavior": null,
+            "actions": null
+          },
+          {
+            "id": "leibniz",
+            "ai": true,
+            "hp": 859,
+            "energy": 39,
+            "x": 384,
+            "attack": "",
+            "guard": false,
+            "motion": "move",
+            "behavior": "space",
+            "actions": {
+              "normal": 3,
+              "heavy": 0,
+              "special": 0,
+              "guard": 0,
+              "dodge": 0,
+              "dash": 0,
+              "jump": 0
+            }
+          }
+        ]
+      },
+      "canvas": {
+        "x": 34,
+        "y": 326,
+        "w": 322,
+        "h": 141
+      },
+      "hud": {
+        "x": 18,
+        "y": 55,
+        "w": 355,
+        "h": 146
+      },
+      "viewport": {
+        "w": 390,
+        "h": 844
+      },
+      "bodyWidth": 390,
+      "activeScreen": true
+    },
+    "tests": {
+      "passed": 216,
+      "total": 216,
+      "failed": []
+    },
+    "screenshot": "/mnt/data/HGC_v14_4_41_QA_390x844.png"
+  },
+  {
+    "viewport": "844x390",
+    "errors": [],
+    "metrics": {
+      "version": "14.4.41",
+      "game": "block",
+      "status": "P1 FIGHT",
+      "timer": "96",
+      "fx": {
+        "spark": 4,
+        "slash": 4,
+        "parry": 0,
+        "dust": 2,
+        "effects": 1
+      },
+      "snapshot": {
+        "mode": "cpu",
+        "difficulty": "normal",
+        "ended": false,
+        "frame": 231,
+        "players": [
+          {
+            "id": "newton",
+            "ai": false,
+            "hp": 1026,
+            "energy": 42,
+            "x": 210,
+            "attack": "heavy",
+            "guard": false,
+            "motion": "attack",
+            "behavior": null,
+            "actions": null
+          },
+          {
+            "id": "leibniz",
+            "ai": true,
+            "hp": 825,
+            "energy": 26,
+            "x": 358,
+            "attack": "",
+            "guard": false,
+            "motion": "hit",
+            "behavior": "avoid",
+            "actions": {
+              "normal": 2,
+              "heavy": 0,
+              "special": 0,
+              "guard": 0,
+              "dodge": 0,
+              "dash": 1,
+              "jump": 0
+            }
+          }
+        ]
+      },
+      "canvas": {
+        "x": 160,
+        "y": 107,
+        "w": 523,
+        "h": 229
+      },
+      "hud": {
+        "x": 136,
+        "y": 36,
+        "w": 572,
+        "h": 46
+      },
+      "viewport": {
+        "w": 844,
+        "h": 390
+      },
+      "bodyWidth": 844,
+      "activeScreen": true
+    },
+    "tests": null,
+    "screenshot": "/mnt/data/HGC_v14_4_41_QA_844x390.png"
+  }
+]
