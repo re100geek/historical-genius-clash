@@ -4816,7 +4816,7 @@ body.hgc-prefight-active #vsIntro{display:none!important;}
 <!-- v14.4.41: pixel-impact rendering, dodge ghosts, perfect-guard accent; no game state or save migration -->
 </head>
 <body><main id="app">
-<header><h1>HISTORICAL<br>GENIUS CLASH</h1><div class="subtitle">CHRONICLE ARSENAL / V14.4.1 · CO-OP RAID + ERA EXPEDITION · 17 FIGHTERS / ONLINE 1V1</div><div class="header-rule"></div><button id="profileShortcut" class="gold-shortcut profile-shortcut" type="button" title="프로필과 업적 보기">▣ PROFILE</button><button id="goldShortcut" class="gold-shortcut" type="button" title="상점과 보유 무기 보기"><span aria-hidden="true">◈</span> GOLD <strong id="goldBalance">0</strong></button></header>
+<header><h1>HISTORICAL<br>GENIUS CLASH</h1><div class="subtitle">CHRONICLE ARSENAL / V14.4.41 · CO-OP RAID + ERA EXPEDITION · 17 FIGHTERS / ONLINE 1V1</div><div class="header-rule"></div><button id="profileShortcut" class="gold-shortcut profile-shortcut" type="button" title="프로필과 업적 보기">▣ PROFILE</button><button id="goldShortcut" class="gold-shortcut" type="button" title="상점과 보유 무기 보기"><span aria-hidden="true">◈</span> GOLD <strong id="goldBalance">0</strong></button></header>
 <section id="select" class="panel">
 <div class="section-kicker">✦ SELECT YOUR HISTORICAL CHAMPION ✦</div>
 <div class="tab-bar" role="tablist" aria-label="게임 메뉴">
@@ -11773,7 +11773,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = TowerRules
         assert('v14.2 캐릭터 17명 애니메이션 프레임',CharacterArtV13.ids.length===17&&CharacterArtV13.poses.length===21);
         assert('v14.2 캐릭터 17명 필살기 아틀라스',UltimateVisualV13.ids.length===17&&typeof UltimateVisualV13.drawCutin==='function');
         assert('v13 가챠 39종과 신규 13종 유지',WeaponSkinModule.catalog.length===51&&ChronoWeaponCatalog.length===17);
-        assert('v14.3.2 캐릭터 17명 × 장비 아틀라스 3종 = 51개',ArcadeWeaponVisuals.count===51&&ArcadeWeaponVisuals.characters.length===17);
+        assert('v14.4.41 캐릭터 17명 × 장비 아틀라스 3종 = 51개',ArcadeWeaponVisuals.count===51&&ArcadeWeaponVisuals.characters.length===17);
         assert('v13.4 전장·무기 공통 스타일',typeof ArcadeStageOverlay.paint==='function'&&!!document.querySelector('#hgc-arcade-theme-v13-4'));
         assert('v13.3 무기 39종 공통 아케이드 렌더 사용',WeaponSkinModule.catalog.every(s=>WeaponSkinModule.draw(document.createElement('canvas').getContext('2d'),s.id)===true));
         assert('v13.2 로그인 독립 메뉴·패널',!!document.querySelector('#accountTab')&&!!document.querySelector('#accountPanel'));
@@ -13086,7 +13086,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = TowerRules
 (() => {
   'use strict';
 
-  const GAME_VERSION = '14.3.8';
+  const GAME_VERSION = '14.4.41';
   const RECOVERY_KEY = 'historicalGeniusClash.recoveryGuard.v1';
   const SAVE_KEYS = Object.freeze([
     'historicalGeniusClash.goldAndSkins.v1',
@@ -13280,14 +13280,14 @@ if (typeof module !== 'undefined' && module.exports) module.exports = TowerRules
     panel.id = 'hgc135Panel';
     panel.className = 'hgc135-panel';
     panel.innerHTML = `
-      <h3>v14.3.2 · 안정성 · 기록 보호 · 배포 확인</h3>
+      <h3>v14.4.41 · 안정성 · 기록 보호 · 배포 확인</h3>
       <p>백업 파일을 먼저 검사합니다. 복원 전에 현재 기록을 별도로 보관합니다.</p>
       <div class="hgc135-actions">
         <button id="hgc135Recover" class="btn alt" type="button" disabled>직전 기록 되돌리기</button>
         <button id="hgc135CheckRelease" class="btn alt" type="button">게임 버전 확인</button>
         <button id="hgc135Refresh" class="btn alt" type="button">새 버전 다시 불러오기</button>
       </div>
-      <div id="hgc135ReleaseStatus" role="status" aria-live="polite">게임 v14.3.2 · 서버 확인 전</div>
+      <div id="hgc135ReleaseStatus" role="status" aria-live="polite">게임 v14.4.41 · 서버 확인 전</div>
       <div id="hgc135Preview" class="hgc135-preview" hidden>
         <strong>복원 내용 미리보기</strong>
         <p id="hgc135PreviewSummary"></p>
@@ -13301,7 +13301,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = TowerRules
     $('#hgc135Confirm').addEventListener('click', commitRestore);
     $('#hgc135Cancel').addEventListener('click', cancelPreview);
     $('#hgc135Recover').addEventListener('click', restoreRecovery);
-    $('#hgc135Panel h3').textContent = 'v14.3.2 · 안정성 · 기록 보호 · 배포 확인';
+    $('#hgc135Panel h3').textContent = 'v14.4.41 · 안정성 · 기록 보호 · 배포 확인';
     $('#hgc135CheckRelease').addEventListener('click', checkRelease);
     $('#hgc135Refresh').addEventListener('click', () => {
       const target = new URL(location.href);

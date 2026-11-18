@@ -1,7 +1,7 @@
 {
   "name": "hgc-v14-3-four-challengers",
   "private": true,
-  "version": "14.3.6",
+  "version": "14.4.41",
   "scripts": {
     "start": "node server.js",
     "test": "node --test tests/*.test.js",

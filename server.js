@@ -10,6 +10,23 @@ const path = require('node:path');
 const crypto = require('node:crypto');
 
 const ROOT = __dirname;
+/** Single source of truth for the release version: package.json. */
+const PACKAGE = require(path.join(ROOT, 'package.json'));
+const GAME_VERSION = typeof PACKAGE.version === 'string' ? PACKAGE.version : '0.0.0';
+const PROTOCOL_VERSION = '10.3';
+const RAID_PROTOCOL_VERSION = '1.0';
+/** Deployed commit: the platform variable wins (Render sets RENDER_GIT_COMMIT), then a local git lookup. */
+function releaseCommit() {
+  const fromEnvironment = [process.env.RENDER_GIT_COMMIT, process.env.GIT_COMMIT, process.env.COMMIT_SHA]
+    .map(value => (value || '').trim()).find(value => /^[0-9a-f]{7,40}$/i.test(value));
+  if (fromEnvironment) return fromEnvironment.slice(0, 7).toLowerCase();
+  try {
+    const {execFileSync} = require('node:child_process');
+    const hash = execFileSync('git', ['rev-parse', '--short=7', 'HEAD'], {cwd:ROOT, encoding:'utf8', stdio:['ignore', 'pipe', 'ignore']}).trim();
+    return /^[0-9a-f]{7,40}$/i.test(hash) ? hash.toLowerCase() : null;
+  } catch {return null;}
+}
+const GIT_COMMIT = releaseCommit();
 const PORT = Number(process.env.PORT || 8787);
 const HOST = process.env.HOST || '0.0.0.0';
 const DATA_DIR = path.resolve(process.env.HGC_DATA_DIR || path.join(ROOT, 'data'));
@@ -186,8 +203,8 @@ const server = http.createServer(async (req,res) => {
   const pathname = new URL(req.url, 'http://localhost').pathname;
   try {
     if (req.method === 'GET' && pathname === '/api/release') return send(res,200,{
-      gameVersion:'14.3.2',protocolVersion:'10.3',features:[
-        'account-local','online-arena','roster-17','tower-99','art-qa']});
+      gameVersion:GAME_VERSION,protocolVersion:PROTOCOL_VERSION,raidProtocolVersion:RAID_PROTOCOL_VERSION,commit:GIT_COMMIT,features:[
+        'account-local','online-arena','coop-raid','roster-17','tower-99','art-qa']});
     if (pathname.startsWith('/api/')) return await api(req,res,pathname);
     if (req.method !== 'GET' && req.method !== 'HEAD') return fail(res,405,'METHOD_NOT_ALLOWED');
     if (pathname === '/' || pathname === '/index.html') {
@@ -195,7 +212,7 @@ const server = http.createServer(async (req,res) => {
       res.writeHead(200, {'Content-Type':'text/html; charset=utf-8', 'Cache-Control':'no-cache'});
       return req.method === 'HEAD' ? res.end() : res.end(contents);
     }
-    if (pathname === '/health') return send(res,200,{status:'ok',online:'10.3',characters:17});
+    if (pathname === '/health') return send(res,200,{status:'ok',online:PROTOCOL_VERSION,gameVersion:GAME_VERSION,commit:GIT_COMMIT,characters:17});
 
     return fail(res,404,'NOT_FOUND');
   } catch (error) {
@@ -205,4 +222,4 @@ const server = http.createServer(async (req,res) => {
 });
 const onlineArena = require('./online-arena').attachOnlineArena(server);
 if (require.main === module) server.listen(PORT, HOST, () => console.log(`HGC game and account server: http://${HOST}:${PORT}`));
-module.exports = {server, onlineArena, validateProfile, isValidCredentials, loadStore, STORE_FILE:DB_FILE};
+module.exports = {server, onlineArena, validateProfile, isValidCredentials, loadStore, STORE_FILE:DB_FILE, GAME_VERSION, GIT_COMMIT};
