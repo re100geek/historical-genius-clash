@@ -1,6 +1,8 @@
 'use strict';
 /* Original HGC v14.1 10.3 authoritative arena protocol, mounted on v14.3.2 account server.
  * Behavior and all original character stats are kept verbatim; HTTP/auth remains in server.js.
+ * Also hosts the cooperative boss raid at /raid: the same deterministic raid rules that
+ * index.html runs offline are extracted from index.html and stepped here authoritatively.
  */
 /* Historical Genius Clash v10.3 — dependency-free HTTP + WebSocket arena server.
  * This is a starter server for casual friend matches, not a production anti-cheat service.
@@ -11,6 +13,7 @@ const crypto = require('node:crypto');
 const fs = require('node:fs');
 const path = require('node:path');
 const os = require('node:os');
+const vm = require('node:vm');
 const PORT = Number(process.env.PORT) || 3000;
 const HOST = process.env.HOST || '0.0.0.0';
 const MAX_ROOMS = 80;
@@ -366,10 +369,198 @@ function handle(ws,data){
  }
 }
 
+/* ---------------------------------------------------------------------------
+ * Cooperative boss raid (/raid).
+ * The client in index.html opens ws(s)://host/raid and speaks raid_* messages:
+ *   client -> server: raid_create, raid_join, raid_ready, raid_start, raid_input,
+ *                     raid_leave, raid_rematch
+ *   server -> client: raid_hello, raid_error, raid_joined, raid_lobby, raid_started,
+ *                     raid_state, raid_result, raid_notice
+ * The server is authoritative: it owns the room, the tick loop and the boss, and it
+ * steps the very same deterministic raid rules that index.html runs locally, which are
+ * read out of the HGC_RAID_RULES block of index.html so the two can never drift apart.
+ * The online 1v1 arena above is untouched.
+ * ------------------------------------------------------------------------- */
+const RAID_PATH = '/raid';
+const RAID_PROTOCOL_VERSION = '1.0';
+const MAX_RAID_ROOMS = 60;
+const RAID_SYNC_EVERY = 2; // one state packet every 2 ticks (15/s)
+const RAID_INPUT_TIMEOUT_MS = 600; // a silent client stands still instead of running away
+const RAID_INPUT_NAMES = ['left','right','jump','guard','attack','strong','special','dodge'];
+const raidRooms = new Map();
+let raidRulesCache = null;
+const emptyRaidInput = () => {
+ const keys = {};for (const name of RAID_INPUT_NAMES) keys[name] = false;return keys;
+};
+/** Reads the shared raid engine straight out of index.html (single source of truth). */
+function raidRules() {
+ if (raidRulesCache) return raidRulesCache;
+ const html = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8');
+ const start = html.indexOf('<!-- HGC_RAID_RULES_BEGIN -->');
+ const end = html.indexOf('<!-- HGC_RAID_RULES_END -->');
+ if (start < 0 || end <= start) throw new Error('HGC_RAID_RULES block missing from index.html');
+ const section = html.slice(start, end);
+ const open = section.indexOf('<script>');
+ const close = section.lastIndexOf('</script>');
+ if (open < 0 || close <= open) throw new Error('HGC_RAID_RULES block is not a script element');
+ const sandbox = {module:{exports:{}}, exports:{}, console};
+ vm.runInNewContext(section.slice(open + 8, close), sandbox, {filename:'index.html#HGC_RAID_RULES', timeout:2000});
+ const rules = sandbox.module.exports;
+ if (!rules || typeof rules.newRaid !== 'function' || typeof rules.step !== 'function' || typeof rules.publicState !== 'function') {
+  throw new Error('HGC_RAID_RULES block did not export the raid engine');
+ }
+ raidRulesCache = rules;return rules;
+}
+function raidRoomCode(){for(let k=0;k<30;k++){let code='';for(let i=0;i<6;i++)code+=ROOM_CODE_CHARS[crypto.randomInt(ROOM_CODE_CHARS.length)];if(!raidRooms.has(code))return code;}throw Error('No raid room codes available');}
+function raidError(ws,message){send(ws,{type:'raid_error',message});}
+function raidLobbyState(room){
+ return {type:'raid_lobby',room:room.code,bossId:room.bossId,difficulty:room.difficulty,status:room.status,
+  slots:room.players.map((p,i)=>p?{slot:i,hero:p.hero,ready:p.ready}:null)};
+}
+function emitRaidLobby(room){tell(room,raidLobbyState(room));}
+function raidNotice(room,message){tell(room,{type:'raid_notice',message});}
+function newRaidPeer(ws,room,slot,hero){
+ return {ws,room,slot,hero,ready:false,input:emptyRaidInput(),lastInputAt:0,lastMessageAt:0};
+}
+function raidCreate(ws,data){
+ const rules=raidRules();
+ if(raidRooms.size>=MAX_RAID_ROOMS){raidError(ws,'현재 레이드 방이 가득 찼습니다. 잠시 후 다시 시도하세요.');return;}
+ const hero=rules.HERO_IDS.includes(data.hero)?data.hero:'newton';
+ const bossId=Object.prototype.hasOwnProperty.call(rules.BOSSES,data.bossId)?data.bossId:'warden';
+ const difficulty=Object.prototype.hasOwnProperty.call(rules.DIFFICULTIES,data.difficulty)?data.difficulty:'normal';
+ const code=raidRoomCode();
+ const room={code,players:[null,null],status:'lobby',bossId,difficulty,state:null,matchNumber:0};
+ const peer=newRaidPeer(ws,room,0,hero);
+ room.players[0]=peer;ws.raidPeer=peer;raidRooms.set(code,room);
+ send(ws,{type:'raid_joined',room:code,slot:0});
+ emitRaidLobby(room);
+ raidNotice(room,'초대 코드를 공유하세요. 준비를 누르면 레이드가 시작됩니다.');
+}
+function raidJoin(ws,data){
+ const rules=raidRules();
+ const code=String(data.room||'').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,6);
+ const room=raidRooms.get(code);
+ if(!room){raidError(ws,'해당 레이드 방을 찾지 못했습니다. 코드를 확인하세요.');return;}
+ if(room.players[1]||room.status!=='lobby'){raidError(ws,'입장 가능한 레이드 방이 아닙니다.');return;}
+ const peer=newRaidPeer(ws,room,1,rules.HERO_IDS.includes(data.hero)?data.hero:'leibniz');
+ room.players[1]=peer;ws.raidPeer=peer;
+ room.players.forEach(p=>{if(p)p.ready=false;});
+ send(ws,{type:'raid_joined',room:code,slot:1});
+ emitRaidLobby(room);
+ raidNotice(room,'동료가 입장했습니다. 두 사람 모두 준비를 누르면 방장이 시작할 수 있습니다.');
+}
+function raidReady(peer,ready){
+ const room=peer.room;if(!room||room.status!=='lobby')return;
+ peer.ready=ready!==false;emitRaidLobby(room);
+}
+function raidStart(peer){
+ const room=peer.room;if(!room)return;
+ if(peer.slot!==0||room.players[0]!==peer){raidError(peer.ws,'방장만 레이드를 시작할 수 있습니다.');return;}
+ if(room.status!=='lobby'){raidError(peer.ws,'이미 진행 중이거나 종료된 레이드입니다.');return;}
+ const joined=room.players.filter(Boolean);
+ if(!joined.length||!joined.every(p=>p.ready)){raidError(peer.ws,'모든 참가자가 준비를 마쳐야 시작할 수 있습니다.');return;}
+ const rules=raidRules();
+ room.status='running';room.matchNumber+=1;
+ room.state=rules.newRaid({bossId:room.bossId,heroes:joined.map(p=>p.hero),difficulty:room.difficulty});
+ for(const p of joined){p.input=emptyRaidInput();p.lastInputAt=now();p.ready=false;}
+ tell(room,{type:'raid_started',room:room.code,bossId:room.bossId,difficulty:room.difficulty,heroes:joined.map(p=>p.hero),matchNumber:room.matchNumber});
+ tell(room,{type:'raid_state',state:rules.publicState(room.state)});
+}
+function raidRematch(peer){
+ const room=peer.room;if(!room)return;
+ if(room.status!=='finished'){raidError(peer.ws,'레이드가 끝난 뒤에 재대전할 수 있습니다.');return;}
+ room.status='lobby';room.state=null;
+ room.players.forEach(p=>{if(p){p.ready=false;p.input=emptyRaidInput();}});
+ emitRaidLobby(room);
+ raidNotice(room,'재대전 대기실로 이동했습니다. 준비를 다시 눌러주세요.');
+}
+/** Ends a running raid that can no longer continue (partner left or disconnected). */
+function endRaid(room,reason){
+ room.status='finished';
+ const state=room.state;
+ if(!state||state.status!=='running')return;
+ state.status='lost';state.winner=false;
+ state.outcome={result:'lost',reason,ticks:state.tick,bossId:state.bossId,difficulty:state.difficulty,
+  heroes:state.players.map(p=>p.id),damage:state.players.map(p=>p.damage),revives:state.players.map(p=>p.revives),
+  downs:state.players.map(p=>p.downs),breaks:state.boss.breakCount,rank:'F'};
+ const rules=raidRules();
+ tell(room,{type:'raid_state',state:rules.publicState(state)});
+ tell(room,{type:'raid_result',outcome:state.outcome,room:room.code});
+ room.players.forEach(p=>{if(p)p.ready=false;});
+}
+function raidLeave(peer,disconnected){
+ if(!peer||!peer.room)return;
+ const room=peer.room;peer.room=null;
+ const slot=room.players.indexOf(peer);
+ if(slot>=0)room.players[slot]=null;
+ const remaining=room.players.filter(Boolean);
+ if(!remaining.length){raidRooms.delete(room.code);if(!disconnected)send(peer.ws,{type:'raid_left'});return;}
+ if(room.status==='running'){
+  endRaid(room,disconnected?'partner_disconnected':'partner_left');
+  raidNotice(room,disconnected?'동료 연결이 끊어져 레이드를 종료했습니다.':'동료가 방을 나가 레이드를 종료했습니다.');
+ }
+ if(!room.players[0]){room.players[0]=remaining[0];room.players[1]=null;room.players[0].slot=0;
+  send(room.players[0].ws,{type:'raid_joined',room:room.code,slot:0});}
+ if(room.status!=='finished')room.status='lobby';
+ room.players.forEach(p=>{if(p)p.ready=false;});
+ emitRaidLobby(room);
+ if(!disconnected)send(peer.ws,{type:'raid_left'});
+}
+function raidInput(peer,data){
+ const room=peer.room;
+ if(!room||room.status!=='running')return;
+ if(now()-peer.lastMessageAt<12)return;
+ if(!data.keys||typeof data.keys!=='object')return;
+ peer.lastMessageAt=now();
+ const clean=emptyRaidInput();
+ for(const key of RAID_INPUT_NAMES)clean[key]=data.keys[key]===true;
+ peer.input=clean;peer.lastInputAt=now();
+}
+function raidStep(room){
+ const state=room.state;
+ if(!state||state.status!=='running')return;
+ const rules=raidRules();
+ const inputs=[];
+ for(let i=0;i<state.players.length;i++){
+  const p=room.players[i];
+  inputs[i]=p&&p.input&&now()-p.lastInputAt<=RAID_INPUT_TIMEOUT_MS?p.input:emptyRaidInput();
+ }
+ rules.step(state,inputs);
+ if(state.status!=='running'){
+  room.status='finished';
+  tell(room,{type:'raid_state',state:rules.publicState(state)});
+  tell(room,{type:'raid_result',outcome:state.outcome,room:room.code});
+  room.players.forEach(p=>{if(p)p.ready=false;});
+  return;
+ }
+ if(state.tick%RAID_SYNC_EVERY===0||state.events.length){
+  tell(room,{type:'raid_state',state:rules.publicState(state)});
+ }
+}
+function handleRaid(ws,data){
+ if(!data||typeof data!=='object'||Array.isArray(data)||typeof data.type!=='string')return;
+ if(data.type==='raid_ping'){send(ws,{type:'raid_pong',nonce:Number.isSafeInteger(data.nonce)?data.nonce:null});return;}
+ const peer=ws.raidPeer;
+ if(!peer){
+  if(data.type==='raid_create')raidCreate(ws,data);
+  else if(data.type==='raid_join')raidJoin(ws,data);
+  else raidError(ws,'먼저 레이드 방을 만들거나 코드로 참가하세요.');
+  return;
+ }
+ if(data.type==='raid_leave'){raidLeave(peer,false);ws.raidPeer=null;return;}
+ if(data.type==='raid_ready'){raidReady(peer,data.ready);return;}
+ if(data.type==='raid_start'){raidStart(peer);return;}
+ if(data.type==='raid_rematch'){raidRematch(peer);return;}
+ if(data.type==='raid_input'){raidInput(peer,data);return;}
+ if(data.type==='raid_create'||data.type==='raid_join'){raidError(ws,'이미 레이드 방에 참가하고 있습니다.');return;}
+ raidError(ws,'알 수 없는 레이드 요청입니다.');
+}
+
 function attachOnlineArena(server){
 server.on('upgrade',(req,socket,head)=>{
  try{
-  if(new URL(req.url,'http://localhost').pathname!=='/ws'){socket.destroy();return;}
+  const pathname=new URL(req.url,'http://localhost').pathname;
+  if(pathname!=='/ws'&&pathname!==RAID_PATH){socket.destroy();return;}
   const origin=req.headers.origin||'';
   const allowed=(process.env.ALLOWED_ORIGINS||'').split(',').map(x=>x.trim()).filter(Boolean);
   if(origin){const hostname=(req.headers.host||'').split(':')[0];
@@ -385,13 +576,30 @@ server.on('upgrade',(req,socket,head)=>{
   socket.write('HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Accept: '+accept+'\r\n\r\n');
 
   const ws=new MiniWS(socket);clients.add(ws);
+  if(pathname===RAID_PATH){
+   ws.onmessage=d=>handleRaid(ws,d);
+   ws.onclose=()=>{const peer=ws.raidPeer;ws.raidPeer=null;if(peer)raidLeave(peer,true);};
+   try{
+    const rules=raidRules();
+    ws.send({type:'raid_hello',version:'10.3',protocolVersion:RAID_PROTOCOL_VERSION,bosses:Object.keys(rules.BOSSES),
+     difficulties:Object.keys(rules.DIFFICULTIES),characters:rules.HERO_IDS.slice()});
+   }catch(error){
+    ws.send({type:'raid_error',message:'레이드 규칙을 불러오지 못했습니다.'});
+    ws.close();return;
+   }
+   if(head?.length)ws.receive(head);
+   return;
+  }
   ws.onmessage=d=>handle(ws,d);ws.onclose=()=>{if(ws.player)leaveRoom(ws.player);};
   ws.send({type:'hello',version:'10.3',features:['stage','leave','ping','cosmetics'],characters:[...STATS.keys()]});
   if(head?.length)ws.receive(head);
  }catch{socket.destroy();}
 });
 
-  const tick=setInterval(()=>{for(const room of rooms.values())stepMatch(room);},TICK_MS);
+  const tick=setInterval(()=>{
+    for(const room of rooms.values())stepMatch(room);
+    for(const room of raidRooms.values())if(room.status==='running')raidStep(room);
+  },TICK_MS);
   const pulse=setInterval(()=>{for(const ws of [...clients]){
     if(now()-ws.pongAt>40000)ws.close();
     else ws.writeFrame(9,Buffer.from('hgc'));
@@ -400,8 +608,8 @@ server.on('upgrade',(req,socket,head)=>{
   server.on('close',()=>{
     clearInterval(tick);clearInterval(pulse);
     for(const ws of [...clients])ws.close();
-    clients.clear();rooms.clear();
+    clients.clear();rooms.clear();raidRooms.clear();
   });
-  return Object.freeze({rooms,STATS,clients,protocolVersion:'10.3'});
+  return Object.freeze({rooms,STATS,clients,protocolVersion:'10.3',raid:Object.freeze({rooms:raidRooms,rules:raidRules,protocolVersion:RAID_PROTOCOL_VERSION})});
 }
 module.exports={attachOnlineArena};
