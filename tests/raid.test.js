@@ -12,6 +12,9 @@ process.env.HGC_DATA_DIR = temp;
 const {server, onlineArena} = require('../server');
 let port;
 const peers = [];
+// These suites drive a real WebSocket client. Node.js 20 has no global WebSocket,
+// so they are skipped there instead of failing the build; run them on Node 22+.
+const skipWithoutWebSocket = typeof WebSocket === 'function' ? false : 'global WebSocket is unavailable (Node.js < 21); run on Node 22+';
 
 async function raidPeer() {
   const socket = new WebSocket(`ws://127.0.0.1:${port}/raid`);
@@ -60,7 +63,7 @@ test.after(async () => {
   fs.rmSync(temp, {recursive:true, force:true});
 });
 
-test('raid_hello advertises the raid roster, bosses and difficulties', async () => {
+test('raid_hello advertises the raid roster, bosses and difficulties', {skip:skipWithoutWebSocket}, async () => {
   const a = await raidPeer();
   const hello = a.packets.find(message => message.type === 'raid_hello');
   assert.equal(hello.protocolVersion, '1.0');
@@ -70,7 +73,7 @@ test('raid_hello advertises the raid roster, bosses and difficulties', async () 
   a.socket.close();
 });
 
-test('solo raid: create, ready, start and authoritative boss damage', async () => {
+test('solo raid: create, ready, start and authoritative boss damage', {skip:skipWithoutWebSocket}, async () => {
   const a = await raidPeer();
   a.send({type:'raid_create', hero:'newton', bossId:'warden', difficulty:'normal'});
   const joined = await expect(a, message => message.type === 'raid_joined' && message.slot === 0);
@@ -105,7 +108,7 @@ test('solo raid: create, ready, start and authoritative boss damage', async () =
   a.socket.close();
 });
 
-test('two-player raid: lobby sync, start gate, partner leave ends the run, rematch', async () => {
+test('two-player raid: lobby sync, start gate, partner leave ends the run, rematch', {skip:skipWithoutWebSocket}, async () => {
   const host = await raidPeer();
   const guest = await raidPeer();
   host.send({type:'raid_create', hero:'galileo', bossId:'colossus', difficulty:'veteran'});
@@ -149,7 +152,7 @@ test('two-player raid: lobby sync, start gate, partner leave ends the run, remat
   host.socket.close();
 });
 
-test('unknown room and stray raid packets fail softly', async () => {
+test('unknown room and stray raid packets fail softly', {skip:skipWithoutWebSocket}, async () => {
   const a = await raidPeer();
   const before = a.packets.length;
   a.send({type:'raid_join', room:'ZZZZZZ', hero:'newton'});

@@ -9,6 +9,9 @@ process.env.HGC_DATA_DIR = temp;
 const {server, onlineArena} = require('../server');
 let port;
 const peers = [];
+// The suites below drive a real WebSocket client. Node.js 20 has no global WebSocket,
+// so they are skipped there instead of failing the build; run them on Node 22+.
+const skipWithoutWebSocket = typeof WebSocket === 'function' ? false : 'global WebSocket is unavailable (Node.js < 21); run on Node 22+';
 
 async function peer() {
   const socket = new WebSocket(`ws://127.0.0.1:${port}/ws`);
@@ -57,7 +60,7 @@ test.after(async () => {
   fs.rmSync(temp, {recursive:true, force:true});
 });
 
-test('real WebSocket connection, two new characters, two-player room and state stream', async () => {
+test('real WebSocket connection, two new characters, two-player room and state stream', {skip:skipWithoutWebSocket}, async () => {
   const a = await peer();
   const b = await peer();
   const names = a.packets.find(packet => packet.type === 'hello').characters;
@@ -114,7 +117,7 @@ test('real WebSocket connection, two new characters, two-player room and state s
   next.socket.close();a.socket.close();
 });
 
-test('all four newcomer specials consume meter but never hit opponents outside their 250px server range',async()=>{
+test('all four newcomer specials consume meter but never hit opponents outside their 250px server range',{skip:skipWithoutWebSocket},async()=>{
   const roster=['jackson','jordan','pele','yisunshin'];
   for(const id of roster){
     const a=await peer();const b=await peer();

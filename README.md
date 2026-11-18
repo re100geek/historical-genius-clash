@@ -97,6 +97,8 @@ npm run check   # server.js·online-arena.js 구문 검사 + npm test (Render �
 - 릴리스: 버전 단일 출처·`/api/release`의 `gameVersion`/`commit`(`release.test.js`)
 - 모드 규칙: 시대 원정·태그 팀·타워·오프라인 프로필(`era-expedition.test.js`, `tag-team.test.js`, `tower.test.js`, `offline-profiles.test.js`)
 
+Node.js 22 이상을 권장합니다. Node.js 20 이하에는 전역 `WebSocket`이 없어 온라인 1:1·협동 레이드 WebSocket 테스트 6개는 건너뛰고(실패 아님) 나머지 검사는 그대로 실행됩니다.
+
 ## 버전 관리 규칙
 
 - 릴리스 버전의 단일 출처는 `package.json`의 `version`입니다.
