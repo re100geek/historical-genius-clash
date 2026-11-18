@@ -1,7 +1,7 @@
 'use strict';
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const rules = require('../src/modes/tag-team-rules.js');
+const rules = require('../tag-team-rules.js');
 const mock=(id, hp=100)=>({id,hp,maxHp:100,attack:0,hitStun:0,ult:0,ground:true,energy:0});
 test('tag roster requires exactly two unique characters on each side',()=>{
   assert.equal(rules.validateTeams([[0,1],[2,3]],17),true);

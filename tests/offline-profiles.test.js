@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const profiles = require('../src/offline/offline-profiles.js');
+const profiles = require('../offline-profiles.js');
 
 class MemoryStorage {
   constructor() { this.contents = new Map(); }

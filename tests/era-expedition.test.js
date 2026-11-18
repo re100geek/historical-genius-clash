@@ -1,7 +1,7 @@
 'use strict';
 const test=require('node:test');
 const assert=require('node:assert/strict');
-const rules=require('../src/modes/era-expedition-rules');
+const rules=require('../era-expedition-rules');
 const ids=['newton','leibniz','handel','bach','davinci','galileo','curie','tesla','ada','alexander','socrates','plato','hannibal','jackson','jordan','pele','yisunshin'];
 const make=(seed=42,era='ancient')=>rules.start({seed,heroId:'newton',startEra:era,baseHp:1060,rosterIds:ids});
 const storage=()=>{const values=new Map();return {getItem:k=>values.get(k)||null,setItem:(k,v)=>values.set(k,v),values}};

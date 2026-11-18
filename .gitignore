@@ -1,0 +1,35 @@
+# HGC repository hygiene — generated or private files that must never be committed.
+
+# Installed dependencies
+node_modules/
+npm-debug.log*
+yarn-error.log*
+
+# Runtime data. data/accounts.json holds password hashes and profiles (never commit it).
+data/
+*.sqlite
+*.sqlite3
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+
+# Operating system and editor noise
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+.idea/
+.vscode/
+
+# Logs, coverage and temporary files
+*.log
+*.tmp
+coverage/
+.cache/
+
+# Local test/QA output
+test-results/
+playwright-report/
+screenshots/
