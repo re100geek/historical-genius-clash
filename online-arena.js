@@ -598,7 +598,14 @@ server.on('upgrade',(req,socket,head)=>{
 
   const tick=setInterval(()=>{
     for(const room of rooms.values())stepMatch(room);
-    for(const room of raidRooms.values())if(room.status==='running')raidStep(room);
+    for(const room of raidRooms.values()){
+      if(room.status!=='running')continue;
+      try{raidStep(room);}catch(error){ // one broken room must never take the server down
+        console.error('HGC raid step failed:',error.message);
+        room.status='finished';
+        tell(room,{type:'raid_error',message:'레이드 처리 중 오류가 발생했습니다. 방을 다시 만들어 주세요.'});
+      }
+    }
   },TICK_MS);
   const pulse=setInterval(()=>{for(const ws of [...clients]){
     if(now()-ws.pongAt>40000)ws.close();
